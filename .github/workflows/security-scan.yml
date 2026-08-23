@@ -79,6 +79,12 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python3 scripts/claude_scan_neutral.py
 
+      - name: Upload scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: claude-neutral-results
+          path: claude_neutral_results.txt
+
   claude-security-aware:
     name: Claude Sonnet Security Review (Security-Aware Prompt)
     runs-on: ubuntu-latest
@@ -98,3 +104,9 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python3 scripts/claude_scan_security_aware.py
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v3
+        with:
+          name: claude-security-aware-results
+          path: claude_security_aware_results.txt

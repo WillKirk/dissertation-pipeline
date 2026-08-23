@@ -1,11 +1,9 @@
 import anthropic
 import os
-import json
+from collections import Counter
 
 def load_repository_files():
-    """Load all relevant source files from the repository."""
     files_content = {}
-    
     extensions = [".py", ".json", ".tf", ".txt", ".yml", ".yaml"]
     exclude_dirs = {"venv", ".git", "__pycache__", ".github"}
     
@@ -24,7 +22,6 @@ def load_repository_files():
 
 
 def format_files_for_prompt(files_content):
-    """Format repository files into a structured string for the prompt."""
     formatted = ""
     for filepath, content in files_content.items():
         formatted += f"\n\n=== FILE: {filepath} ===\n{content}"
@@ -48,21 +45,34 @@ For each issue found, provide:
 4. Recommended fix
 """
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        temperature=0,
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+    all_outputs = []
     
-    output = message.content[0].text
-    print("=== CLAUDE NEUTRAL SCAN RESULTS ===")
-    print(output)
+    for run_number in range(1, 6):
+        print(f"\n=== RUN {run_number} OF 5 ===")
+        
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            temperature=0,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        output = message.content[0].text
+        all_outputs.append(output)
+        print(output)
+    
+    final_output = "\n\n".join([
+        f"=== RUN {i+1} ===\n{output}" 
+        for i, output in enumerate(all_outputs)
+    ])
+    
+    print("\n=== ALL RUNS COMPLETE ===")
+    print(f"Total runs: {len(all_outputs)}")
     
     with open("claude_neutral_results.txt", "w") as f:
-        f.write(output)
+        f.write(final_output)
 
 
 if __name__ == "__main__":

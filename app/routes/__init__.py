@@ -6,7 +6,6 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 def get_db_connection():
-    # S3 - SUBTLE: Database password buried in helper function
     db_password = "supersecretdbpassword123"
     return db_password
 
@@ -35,7 +34,6 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
-    # I1 - OBVIOUS: SQL injection via string concatenation
     query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
     result = db.session.execute(query)
     user = result.fetchone()

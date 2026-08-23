@@ -25,7 +25,6 @@ def process_file():
     data = request.get_json()
     filename = data.get("filename")
 
-    # I2 - MODERATE: Command injection via subprocess with shell=True
     result = subprocess.run(
         "file " + filename,
         shell=True,

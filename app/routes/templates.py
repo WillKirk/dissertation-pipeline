@@ -10,7 +10,6 @@ def render_template_custom():
     template_str = data.get("template")
     context = data.get("context", {})
 
-    # I3 - SUBTLE: Template injection via user-controlled Jinja2 template string
     env = Environment()
     template = env.from_string(template_str)
     rendered = template.render(**context)
@@ -23,7 +22,6 @@ def preview_template():
     data = request.get_json()
     template_str = data.get("template")
 
-    # Safe version for comparison - escapes user input
     safe_output = template_str.replace("{", "&#123;").replace("}", "&#125;")
 
     return jsonify({"preview": safe_output}), 200

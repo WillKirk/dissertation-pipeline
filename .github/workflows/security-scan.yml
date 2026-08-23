@@ -80,7 +80,7 @@ jobs:
         run: python3 scripts/claude_scan_neutral.py
 
       - name: Upload scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: claude-neutral-results
           path: claude_neutral_results.txt
@@ -106,7 +106,7 @@ jobs:
         run: python3 scripts/claude_scan_security_aware.py
 
       - name: Upload scan results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: claude-security-aware-results
           path: claude_security_aware_results.txt

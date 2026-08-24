@@ -8,13 +8,11 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 def get_db_connection():
-    # S3 - SUBTLE: Database password buried in helper function
     db_password = "supersecretdbpassword123"
     return db_password
 
 
 def generate_token(user_id):
-    # S2 - MODERATE: Hardcoded JWT secret key within token generation function
     secret = "jwt-secret-key-hardcoded-2024"
     payload = {
         "user_id": user_id,

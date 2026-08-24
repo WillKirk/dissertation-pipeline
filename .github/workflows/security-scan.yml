@@ -37,27 +37,51 @@ jobs:
           scanners: vuln,secret,misconfig
 
   snyk:
-    name: Snyk Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      name: Snyk Security Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+        - name: Setup Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.10"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+        - name: Install dependencies
+          run: pip install -r requirements.txt
 
-      - name: Run Snyk
-        uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=low
-        continue-on-error: true
+        - name: Install Snyk CLI
+          run: npm install -g snyk
+
+        - name: Authenticate Snyk
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          run: snyk auth $SNYK_TOKEN
+
+        - name: Run Snyk Open Source scan
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          run: snyk test --severity-threshold=low --json > snyk_opensource_results.json || true
+
+        - name: Run Snyk Code scan
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          run: snyk code test --severity-threshold=low > snyk_code_results.txt || true
+
+        - name: Run Snyk IaC scan
+          env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          run: snyk iac test infrastructure/ --severity-threshold=low > snyk_iac_results.txt || true
+
+        - name: Upload Snyk results
+          uses: actions/upload-artifact@v4
+          with:
+            name: snyk-results
+            path: |
+              snyk_opensource_results.json
+              snyk_code_results.txt
+              snyk_iac_results.txt
 
   claude-neutral:
     name: Claude Sonnet Security Review (Neutral Prompt)

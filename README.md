@@ -29,23 +29,29 @@ This repository contains a deliberately vulnerable Flask REST API built as a con
 ## Project Structure
 
 dissertation-pipeline/
-├── .github/
-│ └── workflows/
-│ └── security-scan.yml
-├── infrastructure/
-│ ├── iam-policy.json
-│ └── main.tf
-├── app/
-│ ├── init.py
-│ ├── models.py
-│ ├── config.py
-│ └── routes/
-│ ├── auth.py
-│ ├── users.py
-│ ├── files.py
-│ └── templates.py
+├── .github
+│   └── workflows
+│       └── security-scan.yml
+├── .gitignore
+├── README.md
+├── app
+│   ├── __init__.py
+│   ├── config.py
+│   ├── models.py
+│   └── routes
+│       ├── __init__.py
+│       ├── auth.py
+│       ├── files.py
+│       ├── templates.py
+│       └── users.py
+├── infrastructure
+│   ├── iam-policy.json
+│   └── main.tf
 ├── requirements.txt
-└── run.py
+├── run.py
+└── scripts
+    ├── claude_scan_neutral.py
+    └── claude_scan_security_aware.py
 
 ## Setup
 

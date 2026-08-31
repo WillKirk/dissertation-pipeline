@@ -1,0 +1,206 @@
+
+Snyk Infrastructure as Code
+
+- Snyk testing Infrastructure as Code configuration issues.
+✔ Test completed.
+
+Issues
+
+Low Severity Issues: 11
+
+  [Low] EC2 API termination protection is not enabled
+  Info:    To prevent instance from being accidentally terminated using Amazon
+           EC2, you can enable termination protection for the instance. Without
+           this setting enabled the instances can be terminated by accident.
+           This setting should only be used for instances with high availability
+           requirements. Enabling this may prevent IaC workflows from updating
+           the instance, for example terraform will not be able to terminate the
+           instance to update instance type
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-AWS-426
+  Path:    resource > aws_instance[web_server] > disable_api_termination
+  File:    infrastructure/main.tf
+  Resolve: Set `disable_api_termination` attribute  with value `true`
+
+  [Low] S3 bucket versioning disabled
+  Info:    S3 bucket versioning is disabled. Changes or deletion of objects will
+           not be reversible
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-124
+  Path:    resource > aws_s3_bucket[public_bucket] > versioning > enabled
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, set `versioning.enabled` attribute to
+           `true`. For AWS provider >= v4.0.0, add aws_s3_bucket_versioning
+           resource.
+
+  [Low] S3 bucket versioning disabled
+  Info:    S3 bucket versioning is disabled. Changes or deletion of objects will
+           not be reversible
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-124
+  Path:    resource > aws_s3_bucket[unencrypted_bucket] > versioning > enabled
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, set `versioning.enabled` attribute to
+           `true`. For AWS provider >= v4.0.0, add aws_s3_bucket_versioning
+           resource.
+
+  [Low] S3 bucket versioning disabled
+  Info:    S3 bucket versioning is disabled. Changes or deletion of objects will
+           not be reversible
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-124
+  Path:    resource > aws_s3_bucket[secure_bucket] > versioning > enabled
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, set `versioning.enabled` attribute to
+           `true`. For AWS provider >= v4.0.0, add aws_s3_bucket_versioning
+           resource.
+
+  [Low] S3 bucket MFA delete control disabled
+  Info:    S3 bucket will not enforce MFA login on delete requests. Object could
+           be deleted without stronger MFA authorization
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-127
+  Path:    resource > aws_s3_bucket[unencrypted_bucket] > versioning >
+           mfa_delete
+  File:    infrastructure/main.tf
+  Resolve: Follow instructions in `https://docs.aws.amazon.com/AmazonS3/latest/u
+           serguide/MultiFactorAuthenticationDelete.html` to manually configure
+           the MFA setting. For AWS provider < v4.0.0 set
+           `versioning.mfa_delete` attribute to `true` in aws_s3_bucket
+           resource. For AWS provider >= v4.0.0 set
+           'versioning_configuration.mfa_delete` attribute to `Enabled`. The
+           terraform change is required to reflect the setting in the state file
+
+  [Low] S3 bucket MFA delete control disabled
+  Info:    S3 bucket will not enforce MFA login on delete requests. Object could
+           be deleted without stronger MFA authorization
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-127
+  Path:    resource > aws_s3_bucket[public_bucket] > versioning > mfa_delete
+  File:    infrastructure/main.tf
+  Resolve: Follow instructions in `https://docs.aws.amazon.com/AmazonS3/latest/u
+           serguide/MultiFactorAuthenticationDelete.html` to manually configure
+           the MFA setting. For AWS provider < v4.0.0 set
+           `versioning.mfa_delete` attribute to `true` in aws_s3_bucket
+           resource. For AWS provider >= v4.0.0 set
+           'versioning_configuration.mfa_delete` attribute to `Enabled`. The
+           terraform change is required to reflect the setting in the state file
+
+  [Low] S3 bucket MFA delete control disabled
+  Info:    S3 bucket will not enforce MFA login on delete requests. Object could
+           be deleted without stronger MFA authorization
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-127
+  Path:    resource > aws_s3_bucket[secure_bucket] > versioning > mfa_delete
+  File:    infrastructure/main.tf
+  Resolve: Follow instructions in `https://docs.aws.amazon.com/AmazonS3/latest/u
+           serguide/MultiFactorAuthenticationDelete.html` to manually configure
+           the MFA setting. For AWS provider < v4.0.0 set
+           `versioning.mfa_delete` attribute to `true` in aws_s3_bucket
+           resource. For AWS provider >= v4.0.0 set
+           'versioning_configuration.mfa_delete` attribute to `Enabled`. The
+           terraform change is required to reflect the setting in the state file
+
+  [Low] EC2 instance accepts IMDSv1
+  Info:    Instance Metadata Service v2 is not enforced. Metadata service may be
+           vulnerable to reverse proxy/open firewall misconfigurations and
+           server side request forgery attacks
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-130
+  Path:    resource > aws_instance[web_server] > metadata_options
+  File:    infrastructure/main.tf
+  Resolve: Set `metadata_options.http_tokens` attribute to `required`
+
+  [Low] S3 server access logging is disabled
+  Info:    The s3 access logs will not be collected. There will be no audit
+           trail of access to s3 objects
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-45
+  Path:    input > resource > aws_s3_bucket[public_bucket] > logging
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, add `logging` block attribute. For AWS
+           provider >= v4.0.0, add aws_s3_bucket_logging resource.
+
+  [Low] S3 server access logging is disabled
+  Info:    The s3 access logs will not be collected. There will be no audit
+           trail of access to s3 objects
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-45
+  Path:    input > resource > aws_s3_bucket[secure_bucket] > logging
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, add `logging` block attribute. For AWS
+           provider >= v4.0.0, add aws_s3_bucket_logging resource.
+
+  [Low] S3 server access logging is disabled
+  Info:    The s3 access logs will not be collected. There will be no audit
+           trail of access to s3 objects
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-45
+  Path:    input > resource > aws_s3_bucket[unencrypted_bucket] > logging
+  File:    infrastructure/main.tf
+  Resolve: For AWS provider < v4.0.0, add `logging` block attribute. For AWS
+           provider >= v4.0.0, add aws_s3_bucket_logging resource.
+
+Medium Severity Issues: 1
+
+  [Medium] Non-Encrypted root block device
+  Info:    The root block device for ec2 instance is not encrypted. That should
+           someone gain unauthorized access to the data they would be able to
+           read the contents.
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-53
+  Path:    resource > aws_instance[web_server] > root_block_device > encrypted
+  File:    infrastructure/main.tf
+  Resolve: Set `root_block_device.encrypted` attribute to `true`
+
+High Severity Issues: 4
+
+  [High] S3 block public ACLs control is disabled
+  Info:    Bucket does not prevent creation of public ACLs. Anyone who can
+           manage bucket's ACLs will be able to grant public access to the
+           bucket
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-95
+  Path:    resource > aws_s3_bucket[public_bucket]
+  File:    infrastructure/main.tf
+  Resolve: Set the `aws_s3_bucket_public_access_block` `block_public_acls` field
+           to `true` or use the default setting
+
+  [High] S3 block public policy control is disabled
+  Info:    Bucket does not prevent creation of public policies. Anyone who can
+           manage bucket's policies will be able to grant public access to the
+           bucket.
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-96
+  Path:    resource > aws_s3_bucket_public_access_block[public_bucket_access] >
+           block_public_policy
+  File:    infrastructure/main.tf
+  Resolve: Set `aws_s3_bucket_public_access_block` `block_public_policy`
+           attribute to `true`, or use default
+
+  [High] S3 ignore public ACLs control is disabled
+  Info:    Bucket will recognize public ACLs and allow public access. If public
+           ACL is attached to the bucket, anyone will be able to read and/or
+           write to the bucket.
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-97
+  Path:    resource > aws_s3_bucket_public_access_block[public_bucket_access] >
+           ignore_public_acls
+  File:    infrastructure/main.tf
+  Resolve: Set `aws_s3_bucket_public_access_block` `ignore_public_acls`
+           attribute to `true`, or use default
+
+  [High] S3 restrict public bucket control is disabled
+  Info:    Bucket will recognize public policies and allow public access. If
+           public policy is attached to the bucket, anyone will be able to read
+           and/or write to the bucket.
+  Rule:    https://security.snyk.io/rules/cloud/SNYK-CC-TF-98
+  Path:    resource > aws_s3_bucket_public_access_block[public_bucket_access] >
+           restrict_public_buckets
+  File:    infrastructure/main.tf
+  Resolve: Set `aws_s3_bucket_public_access_block` `restrict_public_buckets`
+           attribute to `true`, or use default
+
+-------------------------------------------------------
+
+Test Summary
+
+  Organization: willkirk
+  Project name: WillKirk/dissertation-pipeline
+
+✔ Files without issues: 0
+✗ Files with issues: 1
+  Ignored issues: 0
+  Total issues: 16 [ 0 critical, 4 high, 1 medium, 11 low ]
+
+-------------------------------------------------------
+
+Tip
+
+  New: Share your test results in the Snyk Web UI with the option --report
+

@@ -72,3 +72,17 @@ This repository contains **deliberately introduced security vulnerabilities** fo
 ## Academic Context
 
 This project forms part of an MSc dissertation at the University of East London. The vulnerability set and evaluation methodology are described in full in the accompanying dissertation.
+
+## Experimental Results
+
+Raw tool outputs from the experimental pipeline run conducted on 24 August 2026 against commit 7dd48a1.
+
+| File | Tool | Scan Type |
+|------|------|-----------|
+| claude_neutral_results.txt | Claude Sonnet 4.6 | Neutral prompt, 5 runs |
+| claude_security_aware_results.txt | Claude Sonnet 4.6 | Security-aware prompt, 5 runs |
+| semgrep_results.txt | Semgrep v1 | p/security-audit rule set |
+| trivy_results.txt | Trivy 0.69.3 | Filesystem scan |
+| snyk_opensource_results.json | Snyk Open Source | Dependency scanning |
+| snyk_code_results.txt | Snyk Code | Static analysis |
+| snyk_iac_results.txt | Snyk IaC | Infrastructure scanning |

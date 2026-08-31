@@ -1,0 +1,78 @@
+
+Testing /home/runner/work/dissertation-pipeline/dissertation-pipeline ...
+
+Open Issues
+
+ ✗ [MEDIUM] Jinja auto-escape is set to false.
+   Finding ID: a370a31d-e219-4121-befc-8e8313d3ebfa
+   Path: app/routes/templates.py, line 13
+   Info: jinja2.Environment is called with no autoescape argument (autoescaping is disabled by default). This increases the risk of Cross-Site Scripting (XSS) attacks.
+
+ ✗ [MEDIUM] Use of Hardcoded Passwords
+   Finding ID: 0cf03eaa-4e43-4273-94f8-88bf93c863d3
+   Path: app/routes/auth.py, line 11
+   Info: Do not hardcode passwords in code. Found hardcoded password used in db_password.
+
+ ✗ [HIGH] Command Injection
+   Finding ID: 9d3595a1-1b83-4139-af1c-477291e4ad79
+   Path: app/routes/files.py, line 28
+   Info: Unsanitized input from the HTTP request body flows into subprocess.run, where it is used as a shell command. This may result in a Command Injection vulnerability.
+
+ ✗ [HIGH] Hardcoded Non-Cryptographic Secret
+   Finding ID: dc1ec424-fe56-480a-98bd-507583d2f34e
+   Path: app/config.py, line 3
+   Info: Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.
+
+ ✗ [HIGH] Hardcoded Non-Cryptographic Secret
+   Finding ID: c57a4337-60a8-4ef2-a897-64206a2b0f48
+   Path: app/routes/auth.py, line 16
+   Info: Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.
+
+ ✗ [HIGH] SQL Injection
+   Finding ID: 1489d54a-7518-4aff-888b-7f2420f1fb44
+   Path: app/routes/auth.py, line 50
+   Info: Unsanitized input from the HTTP request body flows into app.db.session.execute, where it is used in an SQL query. This may result in an SQL Injection vulnerability.
+
+ ✗ [HIGH] Improper Neutralization of Directives in Statically Saved Code
+   Finding ID: 4fd51bd5-262a-4902-96af-f6cc377e2400
+   Path: app/routes/templates.py, line 14
+   Info: Unsanitized input from the HTTP request body flows into from_string, where it is used to construct a template that gets rendered. This may result in a Server-Side Template Injection vulnerability.
+
+
+        
+💡 Tip
+
+   You are currently viewing results with --severity-threshold applied.
+   To view all issues, remove the --severity-threshold flag            
+                                                                       
+
+╭───────────────────────────────────────────────────────────────────────────────────────╮
+│ Test Summary                                                                          │
+│                                                                                       │
+│   Organization:                                                                       │
+│   Test type:         Static code analysis                                             │
+│   Project path:      /home/runner/work/dissertation-pipeline/dissertation-pipeline    │
+│                                                                                       │
+│   Total issues:   7                                                                   │
+│   Ignored issues: 0 [ 0 HIGH  0 MEDIUM  0 LOW ]                                       │
+│   Open issues:    7 [ 5 HIGH  2 MEDIUM  0 LOW ]                                       │
+╰───────────────────────────────────────────────────────────────────────────────────────╯
+    
+💡 Tip
+
+   To view ignored issues, use the --include-ignores option.
+                                                            
+
+
+ ERROR   Forbidden (SNYK-CLI-0000)
+         The encountered error only provides basic information, please take a look at   
+         the given details. If they do not help to resolve the issue, consider          
+         debugging or consulting support.                                               
+                                                                                        
+           Forbidden                                                                    
+
+Status:  403 Forbidden 
+Docs:    https://docs.snyk.io/scan-with-snyk/error-catalog#snyk-cli-0000 
+Tip:     Give the snyk doctor your logs to debug: `snyk doctor --input <log-file>` 
+                                                                                   
+ID:      urn:snyk:interaction:1c6d3c13-3129-4ecf-9f1e-2faab1946f5b 

